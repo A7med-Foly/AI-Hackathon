@@ -49,7 +49,7 @@ SAMPLE_PADDLE_PAGES = [
 
 
 def test_paddle_section_detection():
-    detector = PaddleSectionDetector()
+    detector = PaddleSectionDetector(min_chunk_tokens=0)
     result = detector.parse(SAMPLE_PADDLE_MARKDOWN)
 
     # 1. Document Info Check
@@ -78,7 +78,7 @@ def test_paddle_section_detection():
 
 
 def test_metadata_merging():
-    detector = PaddleSectionDetector()
+    detector = PaddleSectionDetector(min_chunk_tokens=0)
     result = detector.parse_from_pages(SAMPLE_PADDLE_PAGES)
 
     flat_chunks = result["flat_chunks"]
@@ -93,7 +93,7 @@ def test_metadata_merging():
 
 
 def test_json_serializability():
-    detector = PaddleSectionDetector()
+    detector = PaddleSectionDetector(min_chunk_tokens=0)
     result = detector.parse(SAMPLE_PADDLE_MARKDOWN)
 
     json_str = json.dumps(result, indent=2)

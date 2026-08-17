@@ -1,24 +1,23 @@
 """
 PaddleOCR Section Detector & Metadata Merger for Medical Guidelines.
-Extracts hierarchical sections from PaddleOCR .md and .json metadata files.
-Merges page & block layout metadata (bounding boxes, polygon points, block labels, image URLs) into:
-1. A recursive hierarchy tree (JSON)
-2. Flat metadata-enriched chunks ready for Medical RAG indexing (JSON)
+Extracts hierarchical sections from PaddleOCR .md and .json metadata files using Multiline Regex & Multiline Block Aggregation.
+Provides configurable chunk size bounds (max_chunk_tokens, min_chunk_tokens, chunk_overlap_tokens) for RAG embedding optimization.
 """
 
 import json
 import re
 import tiktoken
 from typing import Dict, List, Any, Optional, Tuple
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-# Pre-compile Regex Patterns
-TOC_LINE_PATTERN = re.compile(r'\.{3,}\s*\d+$')
-RUNNING_HEADER_PATTERN = re.compile(r'Type 2 diabetes in adults:\s*management\s*\([^)]*\)', re.IGNORECASE)
-COPYRIGHT_FOOTER_PATTERN = re.compile(r'©\s*NICE\s*\d{4}', re.IGNORECASE)
+# Pre-compile Regex Patterns with MULTILINE (re.M) & IGNORECASE (re.I) Flags
+TOC_LINE_PATTERN = re.compile(r'\.{3,}\s*\d+$', re.MULTILINE)
+RUNNING_HEADER_PATTERN = re.compile(r'Type 2 diabetes in adults:\s*management\s*\([^)]*\)', re.IGNORECASE | re.MULTILINE)
+COPYRIGHT_FOOTER_PATTERN = re.compile(r'©\s*NICE\s*\d{4}', re.IGNORECASE | re.MULTILINE)
 
-# Section Number Regex (e.g., "1.4", "1.4.1", "Section 2.1")
-SECTION_NUM_PATTERN = re.compile(r'^(?:Section\s+)?(\d+(?:\.\d+)+|\d+\.)\s+(.+)$', re.IGNORECASE)
-RECOMMENDATION_NUM_PATTERN = re.compile(r'^(\d+(?:\.\d+){2,})\s+(.+)$')
+# Section & Recommendation Number Regex (matching start-of-line in multiline mode)
+SECTION_NUM_PATTERN = re.compile(r'^(?:Section\s+)?(\d+(?:\.\d+)+|\d+\.)\s+(.+)$', re.IGNORECASE | re.MULTILINE)
+RECOMMENDATION_NUM_PATTERN = re.compile(r'^(\d+(?:\.\d+){2,})\s+(.+)$', re.MULTILINE)
 
 # Clinical Keywords
 CLINICAL_KEYWORDS = [
@@ -39,14 +38,27 @@ class PaddleSectionDetector:
         self,
         document_name: str = "type-2-diabetes-in-adults-management.pdf",
         source_url: str = "https://www.nice.org.uk/guidance/ng28",
+        max_chunk_tokens: int = 600,
+        min_chunk_tokens: int = 30,
+        chunk_overlap_tokens: int = 100,
         tokenizer_model: str = "cl100k_base"
     ):
         self.document_name = document_name
         self.source_url = source_url
+        self.max_chunk_tokens = max_chunk_tokens
+        self.min_chunk_tokens = min_chunk_tokens
+        self.chunk_overlap_tokens = chunk_overlap_tokens
         try:
             self.tokenizer = tiktoken.get_encoding(tokenizer_model)
         except Exception:
             self.tokenizer = None
+
+        self.text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=max_chunk_tokens,
+            chunk_overlap=chunk_overlap_tokens,
+            length_function=self._count_tokens,
+            separators=["\n\n", "\n", ". ", " "]
+        )
 
     def _count_tokens(self, text: str) -> int:
         if self.tokenizer:
@@ -54,7 +66,7 @@ class PaddleSectionDetector:
         return len(text.split())
 
     def _is_noise_line(self, line: str) -> bool:
-        """Determines if a line is a Table of Contents entry or running header/footer."""
+        """Determines if a line is a Table of Contents entry or running header/footer using multiline regex."""
         clean = line.strip()
         if not clean:
             return True
@@ -67,7 +79,7 @@ class PaddleSectionDetector:
         return False
 
     def parse_from_pages(self, raw_pages: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Parses page objects directly from PaddleOCR JSON metadata array, merging layout metadata."""
+        """Parses page objects directly from PaddleOCR JSON metadata array, aggregating multiline section blocks."""
         sections = []
         current_section = None
         current_l1 = ""
@@ -117,6 +129,7 @@ class PaddleSectionDetector:
                         curr_str = f"{sec_num} {sec_title}".strip() if sec_num else sec_title
                         h_path = [p for p in [current_l1, current_l2, curr_str] if p]
 
+                    # Start new multiline section block
                     current_section = {
                         "section_number": sec_num,
                         "section_title": sec_title,
@@ -131,6 +144,7 @@ class PaddleSectionDetector:
                         "parsing_res_list": parsing_res_list
                     }
                 else:
+                    # Append non-header lines to current section's multiline block
                     if current_section:
                         current_section["content_lines"].append(clean)
                     else:
@@ -153,7 +167,7 @@ class PaddleSectionDetector:
         if current_section and "\n".join(current_section["content_lines"]).strip():
             sections.append(current_section)
 
-        # Build outputs with merged metadata
+        # Build outputs with merged metadata and configured chunk size bounds
         return self._build_export_payload(sections)
 
     def parse(self, markdown_text: str, metadata_json_path: Optional[str] = None) -> Dict[str, Any]:
@@ -252,7 +266,7 @@ class PaddleSectionDetector:
         }
 
     def _build_export_payload(self, sections: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Converts internal sections list into structured recursive tree and flat chunks with merged metadata."""
+        """Converts internal sections list into structured recursive tree and flat chunks with configured chunk size limits and token overlap."""
         flat_chunks = []
 
         for idx, sec in enumerate(sections):
@@ -260,26 +274,52 @@ class PaddleSectionDetector:
             if not content:
                 continue
 
-            chunk_id = f"paddle_p{sec['page_number']}_c{idx + 1}"
             token_count = self._count_tokens(content)
-
-            # Extract Merged Metadata
             layout_meta = self._match_layout_metadata(sec, content)
 
-            chunk = {
-                "chunk_id": chunk_id,
-                "section_number": sec["section_number"],
-                "section_title": sec["section_title"],
-                "parent_section": sec["parent_section"],
-                "hierarchy_path": sec["hierarchy_path"],
-                "page_number": sec["page_number"],
-                "content": content,
-                "token_count": token_count,
-                "document_name": self.document_name,
-                "source_url": self.source_url,
-                "layout_metadata": layout_meta
-            }
-            flat_chunks.append(chunk)
+            # Handle chunk merging if chunk is under min_chunk_tokens
+            if token_count < self.min_chunk_tokens and flat_chunks:
+                prev = flat_chunks[-1]
+                if prev["page_number"] == sec["page_number"]:
+                    prev["content"] += "\n" + content
+                    prev["token_count"] = self._count_tokens(prev["content"])
+                    continue
+
+            # Handle chunk splitting if chunk exceeds max_chunk_tokens (with chunk_overlap_tokens overlap)
+            if token_count > self.max_chunk_tokens:
+                sub_texts = self.text_splitter.split_text(content)
+                for sub_i, sub_txt in enumerate(sub_texts):
+                    chunk_id = f"paddle_p{sec['page_number']}_c{idx + 1}_sub{sub_i + 1}"
+                    sub_chunk = {
+                        "chunk_id": chunk_id,
+                        "section_number": sec["section_number"],
+                        "section_title": sec["section_title"],
+                        "parent_section": sec["parent_section"],
+                        "hierarchy_path": sec["hierarchy_path"],
+                        "page_number": sec["page_number"],
+                        "content": sub_txt,
+                        "token_count": self._count_tokens(sub_txt),
+                        "document_name": self.document_name,
+                        "source_url": self.source_url,
+                        "layout_metadata": layout_meta
+                    }
+                    flat_chunks.append(sub_chunk)
+            else:
+                chunk_id = f"paddle_p{sec['page_number']}_c{idx + 1}"
+                chunk = {
+                    "chunk_id": chunk_id,
+                    "section_number": sec["section_number"],
+                    "section_title": sec["section_title"],
+                    "parent_section": sec["parent_section"],
+                    "hierarchy_path": sec["hierarchy_path"],
+                    "page_number": sec["page_number"],
+                    "content": content,
+                    "token_count": token_count,
+                    "document_name": self.document_name,
+                    "source_url": self.source_url,
+                    "layout_metadata": layout_meta
+                }
+                flat_chunks.append(chunk)
 
         # Build Hierarchical Tree View
         tree = self._build_recursive_tree(sections)

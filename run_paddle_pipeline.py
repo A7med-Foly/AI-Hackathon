@@ -16,7 +16,10 @@ def run_paddle_pipeline(
     json_path: str = None,
     output_json_path: str = "paddle_sections_output.json",
     doc_name: str = "type-2-diabetes-in-adults-management.pdf",
-    source_url: str = "https://www.nice.org.uk/guidance/ng28"
+    source_url: str = "https://www.nice.org.uk/guidance/ng28",
+    max_chunk_tokens: int = 600,
+    min_chunk_tokens: int = 30,
+    chunk_overlap_tokens: int = 100
 ):
     print(f"=== [PaddleOCR Section Detection Pipeline] Processing: {md_path} ===")
     
@@ -30,13 +33,16 @@ def run_paddle_pipeline(
     with open(md_file, "r", encoding="utf-8") as f:
         markdown_text = f.read()
 
-    # 2. Run Section Detection Engine
+    # 2. Run Section Detection Engine with Configurable Token Bounds & Overlap
     detector = PaddleSectionDetector(
         document_name=doc_name,
-        source_url=source_url
+        source_url=source_url,
+        max_chunk_tokens=max_chunk_tokens,
+        min_chunk_tokens=min_chunk_tokens,
+        chunk_overlap_tokens=chunk_overlap_tokens
     )
 
-    print("Running Multi-Pattern Section Detection Engine (1.4 / 1.4.1 regex, Markdown headings, keywords)...")
+    print(f"Running Multi-Pattern Section Detection Engine (Max: {max_chunk_tokens}, Min: {min_chunk_tokens}, Overlap: {chunk_overlap_tokens} tokens)...")
     result = detector.parse(markdown_text=markdown_text, metadata_json_path=json_path)
 
     # 3. Export output to JSON file
@@ -93,6 +99,9 @@ if __name__ == "__main__":
     parser.add_argument("--md", type=str, help="Path to PaddleOCR extracted Markdown file (.md)")
     parser.add_argument("--json", type=str, help="Path to PaddleOCR metadata JSON file (.json)")
     parser.add_argument("--output", type=str, default="paddle_sections_output.json", help="Path for output JSON file")
+    parser.add_argument("--max-tokens", type=int, default=600, help="Maximum allowed tokens per chunk (default: 600)")
+    parser.add_argument("--min-tokens", type=int, default=30, help="Minimum tokens per chunk before merging (default: 30)")
+    parser.add_argument("--overlap-tokens", type=int, default=100, help="Token overlap for split chunks (default: 100)")
 
     args = parser.parse_args()
 
@@ -103,5 +112,8 @@ if __name__ == "__main__":
     run_paddle_pipeline(
         md_path=target_md,
         json_path=target_json,
-        output_json_path=args.output
+        output_json_path=args.output,
+        max_chunk_tokens=args.max_tokens,
+        min_chunk_tokens=args.min_tokens,
+        chunk_overlap_tokens=args.overlap_tokens
     )
