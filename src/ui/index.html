@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NICE Guidelines Medical RAG — Visual Evidence Grounding Studio</title>
+
+  <!-- Google Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --panel-bg: rgba(15, 23, 42, 0.75);
+      --panel-border: rgba(255, 255, 255, 0.1);
+      --accent-emerald: #10b981;
+      --accent-cyan: #06b6d4;
+      --accent-blue: #3b82f6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --card-hover: rgba(51, 65, 85, 0.8);
+      --bbox-color: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-main);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 40%);
+    }
+
+    /* Top Navigation Header */
+    header {
+      height: 60px;
+      padding: 0 24px;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 100;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent-emerald), var(--accent-cyan));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #090d16;
+      font-size: 18px;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .logo-text h1 {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      background: linear-gradient(135deg, #ffffff 30%, var(--accent-emerald));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo-text p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .header-badges {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-badge {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--accent-emerald);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-badge i {
+      font-size: 8px;
+    }
+
+    /* Main Container (Dual Pane) */
+    .main-container {
+      flex: 1;
+      display: flex;
+      height: calc(100vh - 60px);
+      overflow: hidden;
+    }
+
+    /* Left Pane: Chat & Q&A */
+    .left-pane {
+      width: 48%;
+      border-right: 1px solid var(--panel-border);
+      display: flex;
+      flex-direction: column;
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px);
+    }
+
+    .query-bar {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--panel-border);
+      background: rgba(30, 41, 59, 0.4);
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper input {
+      width: 100%;
+      padding: 14px 48px 14px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--panel-border);
+      background: rgba(15, 23, 42, 0.8);
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .input-wrapper input:focus {
+      border-color: var(--accent-emerald);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+
+    .send-btn {
+      position: absolute;
+      right: 8px;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: none;
+      background: var(--accent-emerald);
+      color: #090d16;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .send-btn:hover {
+      transform: scale(1.05);
+      background: #34d399;
+    }
+
+    .quick-queries {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      background: rgba(51, 65, 85, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .chip:hover {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: var(--accent-emerald);
+      color: #fff;
+    }
+
+    .chat-scroll {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .response-card {
+      background: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--accent-emerald);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .answer-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+    }
+
+    .citation-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      background: rgba(6, 182, 212, 0.2);
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      color: var(--accent-cyan);
+      cursor: pointer;
+      margin: 2px;
+      transition: all 0.2s;
+    }
+
+    .citation-tag:hover, .citation-tag.active {
+      background: var(--accent-emerald);
+      color: #090d16;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+    }
+
+    .evidence-list {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .evidence-item {
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .evidence-item:hover, .evidence-item.active {
+      border-color: var(--accent-emerald);
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    .evidence-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent-emerald);
+    }
+
+    .score-badge {
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+    }
+
+    /* Right Pane: Visual Evidence Grounding Panel */
+    .right-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #06090e;
+      position: relative;
+    }
+
+    .panel-header {
+      height: 48px;
+      padding: 0 20px;
+      background: rgba(15, 23, 42, 0.8);
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .image-viewport {
+      flex: 1;
+      position: relative;
+      overflow: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: radial-gradient(circle, #0f172a 0%, #06090e 100%);
+    }
+
+    .canvas-container {
+      position: relative;
+      display: inline-block;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--panel-border);
+    }
+
+    .page-image {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      max-height: 80vh;
+      border-radius: 8px;
+    }
+
+    .bbox-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .highlight-box {
+      position: absolute;
+      border: 2.5px solid var(--bbox-color);
+      background: rgba(16, 185, 129, 0.25);
+      border-radius: 4px;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+      transition: all 0.2s ease;
+      animation: pulseBox 2s infinite;
+    }
+
+    @keyframes pulseBox {
+      0% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
+      50% { box-shadow: 0 0 22px rgba(16, 185, 129, 0.8); }
+      100% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .empty-state i {
+      font-size: 48px;
+      margin-bottom: 12px;
+      opacity: 0.3;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon"><i class="fa-solid fa-stethoscope"></i></div>
+      <div class="logo-text">
+        <h1>NICE Guidelines RAG Studio</h1>
+        <p>Visual Evidence Grounding & Clinical Decision Support</p>
+      </div>
+    </div>
+    <div class="header-badges">
+      <div class="status-badge"><i class="fa-solid fa-circle"></i> BGE-Small-v1.5 + BM25 RRF</div>
+      <div class="status-badge"><i class="fa-solid fa-circle"></i> PaddleOCR Metadata</div>
+    </div>
+  </header>
+
+  <div class="main-container">
+    <!-- Left Pane: Q&A -->
+    <div class="left-pane">
+      <div class="query-bar">
+        <div class="input-wrapper">
+          <input type="text" id="query-input" placeholder="Ask a clinical question (e.g., First-line treatment for type 2 diabetes)..." />
+          <button class="send-btn" onclick="submitQuery()"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+        <div class="quick-queries">
+          <div class="chip" onclick="setQuery('What is the first-line pharmacological treatment for adults with type 2 diabetes?')">First-line Metformin</div>
+          <div class="chip" onclick="setQuery('HbA1c target for adults managed with lifestyle and a single drug')">HbA1c Target (48 mmol/mol)</div>
+          <div class="chip" onclick="setQuery('When should SGLT-2 inhibitors be prescribed for diabetes?')">SGLT-2 Inhibitors</div>
+        </div>
+      </div>
+
+      <div class="chat-scroll" id="chat-scroll">
+        <div class="response-card">
+          <div class="card-title"><i class="fa-solid fa-lightbulb"></i> Clinical Assistant Ready</div>
+          <div class="answer-text">
+            Enter a medical query above or click one of the quick clinical prompts to retrieve evidence-grounded recommendations from the NICE Type 2 Diabetes Management guidelines.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Pane: Visual Evidence Grounding Panel -->
+    <div class="right-pane">
+      <div class="panel-header">
+        <div class="panel-title"><i class="fa-solid fa-eye"></i> Visual Evidence Grounding Panel</div>
+        <div class="score-badge" id="page-info">No Page Selected</div>
+      </div>
+      <div class="image-viewport" id="image-viewport">
+        <div class="empty-state" id="empty-state">
+          <i class="fa-solid fa-file-pdf"></i>
+          <p>Click any evidence citation on the left to highlight bounding boxes on the original page</p>
+        </div>
+        <div class="canvas-container" id="canvas-container" style="display: none;">
+          <img id="page-img" class="page-image" src="" alt="Guideline Page Source" onload="onImageLoad()" />
+          <div id="bbox-overlay" class="bbox-overlay"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentCitations = [];
+    let currentImageScale = 1.0;
+
+    function setQuery(text) {
+      document.getElementById('query-input').value = text;
+      submitQuery();
+    }
+
+    async function submitQuery() {
+      const input = document.getElementById('query-input');
+      const query = input.value.trim();
+      if (!query) return;
+
+      const chatScroll = document.getElementById('chat-scroll');
+      chatScroll.innerHTML = `
+        <div class="response-card">
+          <div class="card-title"><i class="fa-solid fa-spinner fa-spin"></i> Retrieving Evidence Chunks & Synthesizing Response...</div>
+          <div class="answer-text">Executing BM25 keyword search + BGE-small dense vector similarity with Reciprocal Rank Fusion...</div>
+        </div>
+      `;
+
+      try {
+        const response = await fetch('/api/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: query, top_k: 4, mode: 'hybrid' })
+        });
+        const data = await response.json();
+        renderResponse(data);
+      } catch (err) {
+        chatScroll.innerHTML = `<div class="response-card"><div class="answer-text" style="color:#ef4444;">Error calling API: ${err.message}</div></div>`;
+      }
+    }
+
+    function renderResponse(data) {
+      const chatScroll = document.getElementById('chat-scroll');
+      currentCitations = data.citations || [];
+
+      // Format answer text with interactive citation tags
+      let formattedAnswer = data.answer;
+      
+      let html = `
+        <div class="response-card">
+          <div class="card-title"><i class="fa-solid fa-user-doctor"></i> Evidence-Grounded Clinical Response</div>
+          <div class="answer-text">${formattedAnswer}</div>
+          
+          <div style="margin-top: 16px;">
+            <div class="card-title" style="color: var(--accent-cyan);"><i class="fa-solid fa-quote-left"></i> Evidence Sources (${currentCitations.length} chunks)</div>
+            <div class="evidence-list">
+      `;
+
+      currentCitations.forEach((cit, idx) => {
+        html += `
+          <div class="evidence-item" id="ev-item-${idx}" onclick="selectCitation(${idx})">
+            <div class="evidence-header">
+              <span>Section ${cit.section_number || 'Sec'} ${cit.section_title} (Page ${cit.page_number})</span>
+              <span class="score-badge">RRF: ${(cit.rrf_score || 0).toFixed(4)}</span>
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+              Path: ${(cit.hierarchy_path || []).join(' > ')}
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div></div></div>`;
+      chatScroll.innerHTML = html;
+
+      if (currentCitations.length > 0) {
+        selectCitation(0);
+      }
+    }
+
+    function selectCitation(idx) {
+      document.querySelectorAll('.evidence-item').forEach(el => el.classList.remove('active'));
+      const activeEl = document.getElementById(`ev-item-${idx}`);
+      if (activeEl) activeEl.classList.add('active');
+
+      const cit = currentCitations[idx];
+      if (!cit) return;
+
+      document.getElementById('empty-state').style.display = 'none';
+      const canvasContainer = document.getElementById('canvas-container');
+      canvasContainer.style.display = 'inline-block';
+
+      const pageImg = document.getElementById('page-img');
+      const pageInfo = document.getElementById('page-info');
+      pageInfo.innerText = `Page ${cit.page_number} | Section ${cit.section_number || ''}`;
+
+      pageImg.src = cit.page_image_url || cit.layout_image_url;
+      pageImg.dataset.bboxes = JSON.stringify(cit.bounding_boxes || []);
+    }
+
+    function onImageLoad() {
+      drawBoundingBoxes();
+    }
+
+    function drawBoundingBoxes() {
+      const pageImg = document.getElementById('page-img');
+      const overlay = document.getElementById('bbox-overlay');
+      overlay.innerHTML = '';
+
+      const bboxesStr = pageImg.dataset.bboxes;
+      if (!bboxesStr) return;
+
+      const bboxes = JSON.parse(bboxesStr);
+      const naturalWidth = pageImg.naturalWidth || 1000;
+      const naturalHeight = pageImg.naturalHeight || 1400;
+      const currentWidth = pageImg.clientWidth;
+      const currentHeight = pageImg.clientHeight;
+
+      const scaleX = currentWidth / naturalWidth;
+      const scaleY = currentHeight / naturalHeight;
+
+      bboxes.forEach(b => {
+        const box = b.bbox; // [ymin, xmin, ymax, xmax]
+        if (!box || box.length < 4) return;
+
+        const ymin = box[0] * scaleY;
+        const xmin = box[1] * scaleX;
+        const ymax = box[2] * scaleY;
+        const xmax = box[3] * scaleX;
+
+        const div = document.createElement('div');
+        div.className = 'highlight-box';
+        div.style.top = `${ymin}px`;
+        div.style.left = `${xmin}px`;
+        div.style.width = `${xmax - xmin}px`;
+        div.style.height = `${ymax - ymin}px`;
+
+        overlay.appendChild(div);
+      });
+    }
+
+    window.addEventListener('resize', drawBoundingBoxes);
+  </script>
+</body>
+</html>
