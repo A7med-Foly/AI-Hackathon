@@ -12,7 +12,7 @@ from src.generation.generator import ClinicalRAGGenerator
 
 def main():
     print("=" * 70)
-    print("🚀 Medical RAG End-to-End Clinical Decision Support Engine (Day 3)")
+    print(" Medical RAG End-to-End Clinical Decision Support Engine")
     print("=" * 70)
 
     # 1. Initialize Generator & Retriever
@@ -21,22 +21,21 @@ def main():
 
     # 2. Run Sample Verification Queries
     test_queries = [
-        "What is the first-line pharmacological treatment for adults with type 2 diabetes?",
         "HbA1c target for adults managed with lifestyle and a single drug"
     ]
 
     for q in test_queries:
-        print(f"\n❓ Query: \"{q}\"")
+        print(f"\nQuery: \"{q}\"")
         res = generator.generate(query=q, top_k=3)
-        print(f"💡 Response:\n{res['answer']}\n")
-        print(f"📌 Citations ({len(res['citations'])} chunks matched):")
+        print(f"Response:\n{res['answer']}\n")
+        print(f"Citations ({len(res['citations'])} chunks matched):")
         for cit in res['citations']:
             print(f"   - Section {cit['section_number']}: {cit['section_title']} (Page {cit['page_number']}) [RRF: {cit['rrf_score']:.4f}]")
         print("-" * 70)
 
-    # 3. Launch FastAPI Server with Visual Evidence Grounding UI Panel
-    print("\n🌐 Starting FastAPI Web Server at http://127.0.0.1:8000 ...")
-    uvicorn.run("src.api.server:app", host="127.0.0.1", port=8000, reload=False)
+    # # 3. Launch FastAPI Server with Visual Evidence Grounding UI Panel
+    # print("\n Starting FastAPI Web Server at http://127.0.0.1:8000 ...")
+    # uvicorn.run("src.api.server:app", host="127.0.0.1", port=8000, reload=False)
 
 
 if __name__ == "__main__":

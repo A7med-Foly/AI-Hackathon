@@ -414,7 +414,7 @@
     </div>
     <div class="header-badges">
       <div class="status-badge"><i class="fa-solid fa-circle"></i> BGE-Small-v1.5 + BM25 RRF</div>
-      <div class="status-badge"><i class="fa-solid fa-circle"></i> PaddleOCR Metadata</div>
+      <div class="status-badge"><i class="fa-solid fa-circle"></i> OpenRouter LLM</div>
     </div>
   </header>
 
@@ -423,7 +423,7 @@
     <div class="left-pane">
       <div class="query-bar">
         <div class="input-wrapper">
-          <input type="text" id="query-input" placeholder="Ask a clinical question (e.g., First-line treatment for type 2 diabetes)..." />
+          <input type="text" id="query-input" placeholder="Ask a clinical question (e.g., First-line treatment for type 2 diabetes)..." onkeydown="if(event.key==='Enter') submitQuery();" />
           <button class="send-btn" onclick="submitQuery()"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
         <div class="quick-queries">
@@ -464,7 +464,6 @@
 
   <script>
     let currentCitations = [];
-    let currentImageScale = 1.0;
 
     function setQuery(text) {
       document.getElementById('query-input').value = text;
@@ -479,21 +478,45 @@
       const chatScroll = document.getElementById('chat-scroll');
       chatScroll.innerHTML = `
         <div class="response-card">
-          <div class="card-title"><i class="fa-solid fa-spinner fa-spin"></i> Retrieving Evidence Chunks & Synthesizing Response...</div>
-          <div class="answer-text">Executing BM25 keyword search + BGE-small dense vector similarity with Reciprocal Rank Fusion...</div>
+          <div class="card-title"><i class="fa-solid fa-spinner fa-spin"></i> Retrieving Evidence & Synthesizing LLM Response...</div>
+          <div class="answer-text">Executing hybrid search (BM25 + BGE Vector RRF) and querying OpenRouter LLM...</div>
         </div>
       `;
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
 
       try {
         const response = await fetch('/api/query', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: query, top_k: 4, mode: 'hybrid' })
+          body: JSON.stringify({ query: query, top_k: 4, mode: 'hybrid' }),
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ detail: `HTTP ${response.status}: ${response.statusText}` }));
+          throw new Error(errorData.detail || `Server returned error ${response.status}`);
+        }
+
         const data = await response.json();
         renderResponse(data);
       } catch (err) {
-        chatScroll.innerHTML = `<div class="response-card"><div class="answer-text" style="color:#ef4444;">Error calling API: ${err.message}</div></div>`;
+        clearTimeout(timeoutId);
+        let msg = err.name === 'AbortError' 
+          ? 'Request timed out after 60 seconds. Please try again.' 
+          : (err.message || 'Network error occurred while fetching API.');
+        
+        chatScroll.innerHTML = `
+          <div class="response-card" style="border-color: rgba(239, 68, 68, 0.4);">
+            <div class="card-title" style="color: #ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> API Request Error</div>
+            <div class="answer-text" style="color: #f87171;">${msg}</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">
+              Tip: If you restarted uvicorn with <code>--reload</code>, in-flight requests may drop during server restart. Retry submitting the query.
+            </div>
+          </div>
+        `;
       }
     }
 
@@ -501,7 +524,6 @@
       const chatScroll = document.getElementById('chat-scroll');
       currentCitations = data.citations || [];
 
-      // Format answer text with interactive citation tags
       let formattedAnswer = data.answer;
       
       let html = `

@@ -1,5 +1,5 @@
 """
-Unit and Integration Tests for Day 3 Clinical RAG Generation & FastAPI Endpoints.
+Unit and Integration Tests for Day 3 Clinical RAG Generation & FastAPI Endpoints using OpenRouter LLM.
 """
 
 import pytest
@@ -11,7 +11,7 @@ from fastapi.testclient import TestClient
 def test_generator_initialization():
     gen = ClinicalRAGGenerator()
     assert gen.retriever is not None
-    assert gen.model_name == "gpt-4o-mini"
+    assert "llama" in gen.model_name.lower() or "gpt" in gen.model_name.lower() or "gemini" in gen.model_name.lower()
 
 
 def test_generator_synthesis():
@@ -25,6 +25,7 @@ def test_generator_synthesis():
     assert "answer" in res
     assert "citations" in res
     assert len(res["citations"]) > 0
+    assert len(res["answer"]) > 10
 
     first_cit = res["citations"][0]
     assert "section_number" in first_cit

@@ -1,14 +1,28 @@
 """
 Clinical RAG Generator Engine - Day 3.
-Synthesizes evidence-grounded responses from retrieved NICE guideline chunks,
+Synthesizes evidence-grounded responses from retrieved NICE guideline chunks using OpenRouter / OpenAI LLM,
 enforcing strict section & page citations [Section X.Y, Page Z] and visual evidence tracing.
 """
 
 import os
 import json
+import pathlib
 from typing import List, Dict, Any, Optional
 from src.retrieval.retriever import ClinicalRetriever
 
+
+def load_env_file():
+    """Loads environment variables from .env if present."""
+    env_path = pathlib.Path(".env")
+    if env_path.exists():
+        with open(env_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, val = line.split("=", 1)
+                    os.environ.setdefault(key.strip(), val.strip().strip('"').strip("'"))
+
+load_env_file()
 
 SYSTEM_CLINICAL_PROMPT = """You are an expert Clinical Decision Support Assistant specializing in NICE Medical Guidelines.
 Your task is to provide clear, evidence-grounded answers to medical queries based ONLY on the retrieved guideline context provided below.
@@ -25,25 +39,23 @@ class ClinicalRAGGenerator:
     def __init__(
         self,
         retriever: Optional[ClinicalRetriever] = None,
-        model_name: str = "gpt-4o-mini",
+        model_name: str = "openai/gpt-4o-mini",
         api_key: Optional[str] = None
     ):
         self.retriever = retriever or ClinicalRetriever()
         self.model_name = model_name
-        self.api_key = api_key or os.environ.get("OPENAI_API_KEY") or os.environ.get("OPENROUTER_API_KEY")
-        self.llm_client = None
+        self.api_key = api_key or os.environ.get("OPENROUTER_API_KEY") or os.environ.get("OPENAI_API_KEY")
+        
+        if not self.api_key:
+            raise ValueError("OPENROUTER_API_KEY or OPENAI_API_KEY must be set in environment or passed to ClinicalRAGGenerator.")
 
-        if self.api_key:
-            try:
-                from openai import OpenAI
-                base_url = "https://openrouter.ai/api/v1" if "openrouter" in self.api_key.lower() or os.environ.get("OPENROUTER_API_KEY") else None
-                self.llm_client = OpenAI(api_key=self.api_key, base_url=base_url)
-            except Exception as e:
-                print(f"⚠️ Warning: Could not initialize OpenAI client ({e}). Using deterministic clinical synthesis engine.")
+        from openai import OpenAI
+        base_url = "https://openrouter.ai/api/v1" if "openrouter" in self.api_key.lower() or os.environ.get("OPENROUTER_API_KEY") else None
+        self.llm_client = OpenAI(api_key=self.api_key, base_url=base_url)
 
     def generate(self, query: str, top_k: int = 4, mode: str = "hybrid") -> Dict[str, Any]:
         """
-        Executes hybrid retrieval and generates an evidence-grounded clinical response with structured citations.
+        Executes hybrid retrieval and generates an evidence-grounded clinical response with structured citations using LLM.
         """
         if not self.retriever._initialized:
             self.retriever.initialize()
@@ -54,7 +66,7 @@ class ClinicalRAGGenerator:
         if not retrieved_chunks:
             return {
                 "query": query,
-                "answer": "Based on the provided NICE guidelines context, no relevant evidence was found for this query.",
+                "answer": "^^^^^^^^^^^^^^^^^6Based on the provided NICE guidelines context, no relevant evidence was found for this query.",
                 "citations": [],
                 "evidence_chunks": []
             }
@@ -92,13 +104,9 @@ class ClinicalRAGGenerator:
                 "bm25_rank": item.get("bm25_rank")
             })
 
-        # 3. Generate Answer (using LLM or High-Precision Synthesis Engine)
+        # 3. Generate Answer using LLM
         context_str = "\n".join(context_blocks)
-        
-        if self.llm_client:
-            answer = self._call_llm(query, context_str)
-        else:
-            answer = self._synthesize_response(query, retrieved_chunks)
+        answer = self._call_llm(query, context_str)
 
         return {
             "query": query,
@@ -108,41 +116,38 @@ class ClinicalRAGGenerator:
         }
 
     def _call_llm(self, query: str, context_str: str) -> str:
-        """Calls OpenAI / OpenRouter LLM API to generate response."""
+        """Calls OpenAI / OpenRouter LLM API with fallback model strategy."""
         messages = [
             {"role": "system", "content": SYSTEM_CLINICAL_PROMPT},
             {"role": "user", "content": f"CLINICAL GUIDELINE EVIDENCE:\n{context_str}\n\nCLINICAL QUERY: {query}"}
         ]
-        try:
-            response = self.llm_client.chat.completions.create(
-                model=self.model_name,
-                messages=messages,
-                temperature=0.1
-            )
-            return response.choices[0].message.content
-        except Exception as e:
-            print(f"⚠️ LLM API call failed ({e}). Falling back to clinical synthesis engine.")
-            return self._synthesize_response(query, [])
-
-    def _synthesize_response(self, query: str, retrieved_chunks: List[Dict[str, Any]]) -> str:
-        """Deterministic evidence-grounded clinical synthesis fallback when LLM API key is not present."""
-        if not retrieved_chunks:
-            return "Based on the provided NICE guidelines context, no relevant evidence was found for this query."
-
-        top_chunk = retrieved_chunks[0]
-        meta = top_chunk.get("metadata", top_chunk)
-        sec_num = meta.get("section_number", "")
-        sec_title = meta.get("section_title", "")
-        page_num = meta.get("page_number", 1)
-        content = top_chunk.get("content", meta.get("content", "")).strip()
-
-        cit_tag = f"[Section {sec_num}, Page {page_num}]" if sec_num else f"[{sec_title}, Page {page_num}]"
         
-        summary_lines = []
-        for line in content.split('\n'):
-            line_clean = line.strip()
-            if line_clean and not line_clean.startswith('#'):
-                summary_lines.append(line_clean)
+        # Candidate models list for automatic failover
+        models_to_try = [
+            self.model_name,
+            # "openai/gpt-oss-20b:free",
+            # "z-ai/glm-5.2:free",
+            # "nvidia/nemotron-3.5-lightning:free",
+            "google/gemma-4-31b-it:free"
+        ]
+        
+        # Remove duplicates while preserving order
+        seen = set()
+        models_unique = [m for m in models_to_try if not (m in seen or seen.add(m))]
 
-        body_text = " ".join(summary_lines[:3])
-        return f"According to the NICE guideline recommendation {cit_tag}:\n\n{body_text} {cit_tag}"
+        last_error = None
+        for m in models_unique:
+            try:
+                response = self.llm_client.chat.completions.create(
+                    model=m,
+                    messages=messages,
+                    temperature=0.1,
+                    max_tokens=1024
+                )
+                if response and response.choices and response.choices[0].message.content:
+                    return response.choices[0].message.content
+            except Exception as e:
+                print(f"⚠️ Model '{m}' call failed ({e}). Trying next fallback model...")
+                last_error = e
+
+        raise RuntimeError(f"All LLM models failed. Last error: {last_error}")
