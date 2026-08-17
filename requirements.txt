@@ -1,0 +1,7 @@
+pymupdf4llm
+langchain-text-splitters
+chromadb
+langchain-community
+langchain
+langchain-core
+langchain-openai
