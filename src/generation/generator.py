@@ -66,7 +66,7 @@ class ClinicalRAGGenerator:
         if not retrieved_chunks:
             return {
                 "query": query,
-                "answer": "^^^^^^^^^^^^^^^^^6Based on the provided NICE guidelines context, no relevant evidence was found for this query.",
+                "answer": "Based on the provided NICE guidelines context, no relevant evidence was found for this query.",
                 "citations": [],
                 "evidence_chunks": []
             }
