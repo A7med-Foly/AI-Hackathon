@@ -94,6 +94,7 @@ class ClinicalRAGGenerator:
                 "section_number": sec_num,
                 "section_title": sec_title,
                 "page_number": page_num,
+                "pdf_page_number": meta.get("pdf_page_number", page_num),
                 "chunk_id": item.get("chunk_id", ""),
                 "hierarchy_path": meta.get("hierarchy_path", []),
                 "bounding_boxes": bboxes,

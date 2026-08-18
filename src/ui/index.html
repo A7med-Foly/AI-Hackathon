@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NICE Guidelines Medical RAG — Visual Evidence Grounding Studio</title>
+  <title>Medical Guidelines RAG — Visual Evidence Grounding Studio</title>
 
   <!-- Google Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -95,6 +95,18 @@
       display: flex;
       align-items: center;
       gap: 12px;
+    }
+
+    .doc-select-dropdown {
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
     }
 
     .status-badge {
@@ -248,28 +260,6 @@
       white-space: pre-wrap;
     }
 
-    .citation-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 2px 8px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 600;
-      background: rgba(6, 182, 212, 0.2);
-      border: 1px solid rgba(6, 182, 212, 0.4);
-      color: var(--accent-cyan);
-      cursor: pointer;
-      margin: 2px;
-      transition: all 0.2s;
-    }
-
-    .citation-tag:hover, .citation-tag.active {
-      background: var(--accent-emerald);
-      color: #090d16;
-      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
-    }
-
     .evidence-list {
       margin-top: 16px;
       display: flex;
@@ -408,12 +398,16 @@
     <div class="logo-container">
       <div class="logo-icon"><i class="fa-solid fa-stethoscope"></i></div>
       <div class="logo-text">
-        <h1>NICE Guidelines RAG Studio</h1>
+        <h1>Medical Guidelines RAG Studio</h1>
         <p>Visual Evidence Grounding & Clinical Decision Support</p>
       </div>
     </div>
     <div class="header-badges">
-      <div class="status-badge"><i class="fa-solid fa-circle"></i> BGE-Small-v1.5 + BM25 RRF</div>
+      <select id="doc-selector" class="doc-select-dropdown" onchange="onDocumentChange()">
+        <option value="hypertension" selected>🩺 WHO Hypertension Guidelines (2021)</option>
+        <option value="diabetes">🩸 NICE Type 2 Diabetes Guidelines</option>
+      </select>
+      <div class="status-badge"><i class="fa-solid fa-circle"></i> BGE-Small + BM25 RRF</div>
       <div class="status-badge"><i class="fa-solid fa-circle"></i> OpenRouter LLM</div>
     </div>
   </header>
@@ -423,21 +417,19 @@
     <div class="left-pane">
       <div class="query-bar">
         <div class="input-wrapper">
-          <input type="text" id="query-input" placeholder="Ask a clinical question (e.g., First-line treatment for type 2 diabetes)..." onkeydown="if(event.key==='Enter') submitQuery();" />
+          <input type="text" id="query-input" placeholder="Ask a clinical question (e.g., First-line drug classes for hypertension)..." onkeydown="if(event.key==='Enter') submitQuery();" />
           <button class="send-btn" onclick="submitQuery()"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
-        <div class="quick-queries">
-          <div class="chip" onclick="setQuery('What is the first-line pharmacological treatment for adults with type 2 diabetes?')">First-line Metformin</div>
-          <div class="chip" onclick="setQuery('HbA1c target for adults managed with lifestyle and a single drug')">HbA1c Target (48 mmol/mol)</div>
-          <div class="chip" onclick="setQuery('When should SGLT-2 inhibitors be prescribed for diabetes?')">SGLT-2 Inhibitors</div>
+        <div class="quick-queries" id="quick-queries">
+          <!-- Populated dynamically via JS -->
         </div>
       </div>
 
       <div class="chat-scroll" id="chat-scroll">
         <div class="response-card">
           <div class="card-title"><i class="fa-solid fa-lightbulb"></i> Clinical Assistant Ready</div>
-          <div class="answer-text">
-            Enter a medical query above or click one of the quick clinical prompts to retrieve evidence-grounded recommendations from the NICE Type 2 Diabetes Management guidelines.
+          <div class="answer-text" id="welcome-text">
+            Enter a medical query above or click one of the quick clinical prompts to retrieve evidence-grounded recommendations from the WHO Hypertension guidelines.
           </div>
         </div>
       </div>
@@ -465,6 +457,43 @@
   <script>
     let currentCitations = [];
 
+    const QUICK_QUERIES = {
+      hypertension: [
+        { label: 'First-line Drug Classes', query: 'What are the recommended first-line drug classes for hypertension in adults?' },
+        { label: 'Blood Pressure Threshold', query: 'At what blood pressure threshold should pharmacological treatment be initiated?' },
+        { label: 'Combination Therapy', query: 'When should combination therapy be started for hypertension?' },
+        { label: 'Target Blood Pressure', query: 'What is the target blood pressure goal for adults on antihypertensive medication?' }
+      ],
+      diabetes: [
+        { label: 'First-line Metformin', query: 'What is the first-line pharmacological treatment for adults with type 2 diabetes?' },
+        { label: 'HbA1c Target (48 mmol/mol)', query: 'HbA1c target for adults managed with lifestyle and a single drug' },
+        { label: 'SGLT-2 Inhibitors', query: 'When should SGLT-2 inhibitors be prescribed for diabetes?' }
+      ]
+    };
+
+    function updateQuickQueries() {
+      const doc = document.getElementById('doc-selector').value;
+      const container = document.getElementById('quick-queries');
+      container.innerHTML = '';
+
+      (QUICK_QUERIES[doc] || []).forEach(q => {
+        const chip = document.createElement('div');
+        chip.className = 'chip';
+        chip.innerText = q.label;
+        chip.onclick = () => setQuery(q.query);
+        container.appendChild(chip);
+      });
+
+      const welcomeText = document.getElementById('welcome-text');
+      if (welcomeText) {
+        welcomeText.innerText = `Enter a medical query above or click one of the quick clinical prompts to retrieve evidence-grounded recommendations from the ${doc === 'hypertension' ? 'WHO Hypertension Guidelines (2021)' : 'NICE Type 2 Diabetes Guidelines'}.`;
+      }
+    }
+
+    function onDocumentChange() {
+      updateQuickQueries();
+    }
+
     function setQuery(text) {
       document.getElementById('query-input').value = text;
       submitQuery();
@@ -475,22 +504,23 @@
       const query = input.value.trim();
       if (!query) return;
 
+      const doc = document.getElementById('doc-selector').value;
       const chatScroll = document.getElementById('chat-scroll');
       chatScroll.innerHTML = `
         <div class="response-card">
           <div class="card-title"><i class="fa-solid fa-spinner fa-spin"></i> Retrieving Evidence & Synthesizing LLM Response...</div>
-          <div class="answer-text">Executing hybrid search (BM25 + BGE Vector RRF) and querying OpenRouter LLM...</div>
+          <div class="answer-text">Executing hybrid search (BM25 + BGE Vector RRF) on ${doc === 'hypertension' ? 'WHO Hypertension' : 'NICE Diabetes'} guideline and querying OpenRouter LLM...</div>
         </div>
       `;
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
 
       try {
         const response = await fetch('/api/query', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: query, top_k: 4, mode: 'hybrid' }),
+          body: JSON.stringify({ query: query, document: doc, top_k: 4, mode: 'hybrid' }),
           signal: controller.signal
         });
         clearTimeout(timeoutId);
@@ -512,9 +542,6 @@
           <div class="response-card" style="border-color: rgba(239, 68, 68, 0.4);">
             <div class="card-title" style="color: #ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> API Request Error</div>
             <div class="answer-text" style="color: #f87171;">${msg}</div>
-            <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">
-              Tip: If you restarted uvicorn with <code>--reload</code>, in-flight requests may drop during server restart. Retry submitting the query.
-            </div>
           </div>
         `;
       }
@@ -572,7 +599,8 @@
 
       const pageImg = document.getElementById('page-img');
       const pageInfo = document.getElementById('page-info');
-      pageInfo.innerText = `Page ${cit.page_number} | Section ${cit.section_number || ''}`;
+      const pdfPageStr = cit.pdf_page_number ? ` (PDF Page ${cit.pdf_page_number})` : '';
+      pageInfo.innerText = `Printed Page ${cit.page_number}${pdfPageStr} | Section ${cit.section_number || ''}`;
 
       pageImg.src = cit.page_image_url || cit.layout_image_url;
       pageImg.dataset.bboxes = JSON.stringify(cit.bounding_boxes || []);
@@ -596,30 +624,53 @@
       const currentWidth = pageImg.clientWidth;
       const currentHeight = pageImg.clientHeight;
 
+      if (currentWidth === 0 || currentHeight === 0) return;
+
       const scaleX = currentWidth / naturalWidth;
       const scaleY = currentHeight / naturalHeight;
 
       bboxes.forEach(b => {
-        const box = b.bbox; // [ymin, xmin, ymax, xmax]
-        if (!box || box.length < 4) return;
+        let xmin, ymin, xmax, ymax;
 
-        const ymin = box[0] * scaleY;
-        const xmin = box[1] * scaleX;
-        const ymax = box[2] * scaleY;
-        const xmax = box[3] * scaleX;
+        if (b.polygon && Array.isArray(b.polygon) && b.polygon.length >= 4) {
+          const xs = b.polygon.map(p => p[0]);
+          const ys = b.polygon.map(p => p[1]);
+          xmin = Math.min(...xs);
+          xmax = Math.max(...xs);
+          ymin = Math.min(...ys);
+          ymax = Math.max(...ys);
+        } else if (b.bbox && Array.isArray(b.bbox) && b.bbox.length >= 4) {
+          // PaddleOCR bbox: [x1, y1, x2, y2] = [xmin, ymin, xmax, ymax]
+          xmin = Math.min(b.bbox[0], b.bbox[2]);
+          xmax = Math.max(b.bbox[0], b.bbox[2]);
+          ymin = Math.min(b.bbox[1], b.bbox[3]);
+          ymax = Math.max(b.bbox[1], b.bbox[3]);
+        } else {
+          return;
+        }
+
+        const scaledXmin = xmin * scaleX;
+        const scaledYmin = ymin * scaleY;
+        const scaledWidth = (xmax - xmin) * scaleX;
+        const scaledHeight = (ymax - ymin) * scaleY;
+
+        // Skip degenerate zero-size boxes
+        if (scaledWidth <= 2 || scaledHeight <= 2) return;
 
         const div = document.createElement('div');
         div.className = 'highlight-box';
-        div.style.top = `${ymin}px`;
-        div.style.left = `${xmin}px`;
-        div.style.width = `${xmax - xmin}px`;
-        div.style.height = `${ymax - ymin}px`;
+        div.style.top = `${scaledYmin}px`;
+        div.style.left = `${scaledXmin}px`;
+        div.style.width = `${scaledWidth}px`;
+        div.style.height = `${scaledHeight}px`;
 
         overlay.appendChild(div);
       });
     }
 
     window.addEventListener('resize', drawBoundingBoxes);
+    // Initialize quick queries on load
+    updateQuickQueries();
   </script>
 </body>
 </html>

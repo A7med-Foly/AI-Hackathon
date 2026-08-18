@@ -6,7 +6,8 @@ Usage:
     --json Guideline-for-the-pharmacological-treatment-of-hypertension-in-adults.json \
     --md Guideline-for-the-pharmacological-treatment-of-hypertension-in-adults.md \
     --doc-name "Guideline for the pharmacological treatment of hypertension in adults" \
-    --doc-slug "hypertension"
+    --doc-slug "hypertension" \
+    --page-offset 12
 """
 
 import os
@@ -25,6 +26,7 @@ def parse_args():
     parser.add_argument("--md", required=False, help="Path to PaddleOCR .md text file")
     parser.add_argument("--doc-name", default="Medical Guideline", help="Full title of the document")
     parser.add_argument("--doc-slug", default="hypertension", help="Short slug identifier (e.g. hypertension)")
+    parser.add_argument("--page-offset", type=int, default=0, help="Number of front-matter cover pages before Page 1")
     parser.add_argument("--embedding-model", default="BAAI/bge-small-en-v1.5", help="SentenceTransformer model name")
     parser.add_argument("--chroma-dir", default="./chroma_db", help="ChromaDB persistence directory")
     return parser.parse_args()
@@ -43,12 +45,13 @@ def main():
     print("=" * 70)
 
     # 1. Parse JSON / MD into Chunks & Section Tree
-    print(f"\n1️⃣ Parsing layout metadata from {args.json}...")
+    print(f"\n1️⃣ Parsing layout metadata from {args.json} (page_offset={args.page_offset})...")
     detector = PaddleSectionDetector(
         document_name=args.doc_name,
         source_url="https://www.who.int/publications/i/item/9789240033987",
         max_chunk_tokens=600,
-        chunk_overlap_tokens=100
+        chunk_overlap_tokens=100,
+        page_offset=args.page_offset
     )
 
     with open(json_path, "r", encoding="utf-8") as f:

@@ -1,13 +1,13 @@
 """
-FastAPI Server for Medical RAG Clinical Decision Support.
-Exposes REST endpoints for clinical RAG queries and section hierarchy browsing.
+FastAPI Server for Multi-Guideline Medical RAG Clinical Decision Support.
+Exposes REST endpoints for clinical RAG queries and section hierarchy browsing across guidelines.
 Serves interactive Visual Evidence Grounding UI Panel with bounding box overlay rendering.
 """
 
 import json
 import pathlib
 from typing import Optional, List, Dict, Any
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -16,7 +16,7 @@ from src.generation.generator import ClinicalRAGGenerator
 from src.retrieval.retriever import ClinicalRetriever
 
 app = FastAPI(
-    title="NICE Guidelines Medical RAG API",
+    title="Medical RAG Guideline Decision Support API",
     description="Evidence-Grounded Medical Guideline Decision Support API with Visual Grounding Panel",
     version="1.0.0"
 )
@@ -30,26 +30,62 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Global Generator Instance
-generator = ClinicalRAGGenerator()
+# Registry of Available Guideline Generators
+GENERATORS: Dict[str, ClinicalRAGGenerator] = {}
+
+
+def get_generator(doc_key: str = "hypertension") -> ClinicalRAGGenerator:
+    """Retrieves or initializes a ClinicalRAGGenerator for the specified document slug."""
+    if doc_key in GENERATORS:
+        return GENERATORS[doc_key]
+
+    if doc_key == "hypertension":
+        json_path = "hypertension_sections_output.json"
+        coll_name = "med_guidelines_hypertension_BAAI_bge_small_en_v1_5"
+    elif doc_key == "diabetes" or doc_key == "type2_diabetes":
+        json_path = "paddle_sections_output.json"
+        coll_name = "med_guidelines_BAAI_bge_small_en_v1_5"
+    else:
+        # Fallback to hypertension if file exists
+        if pathlib.Path("hypertension_sections_output.json").exists():
+            json_path = "hypertension_sections_output.json"
+            coll_name = "med_guidelines_hypertension_BAAI_bge_small_en_v1_5"
+        else:
+            json_path = "paddle_sections_output.json"
+            coll_name = "med_guidelines_BAAI_bge_small_en_v1_5"
+
+    retriever = ClinicalRetriever(
+        json_chunks_path=json_path,
+        collection_name=coll_name
+    )
+    retriever.initialize()
+    gen = ClinicalRAGGenerator(retriever=retriever)
+    GENERATORS[doc_key] = gen
+    return gen
 
 
 class QueryRequest(BaseModel):
     query: str
+    document: Optional[str] = "hypertension"
     top_k: int = 4
     mode: str = "hybrid"
-    section_filter: Optional[str] = None
 
 
 @app.on_event("startup")
 def startup_event():
-    print("🚀 Initializing Medical RAG Clinical Retriever & Generator...")
-    generator.retriever.initialize()
+    print("🚀 Pre-loading Default Hypertension & Diabetes Guideline Generators...")
+    if pathlib.Path("hypertension_sections_output.json").exists():
+        get_generator("hypertension")
+    if pathlib.Path("paddle_sections_output.json").exists():
+        get_generator("diabetes")
 
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "retriever_initialized": generator.retriever._initialized}
+    return {
+        "status": "ok",
+        "loaded_documents": list(GENERATORS.keys())
+    }
 
 
 @app.post("/api/query")
@@ -57,22 +93,30 @@ def process_query(req: QueryRequest):
     if not req.query.strip():
         raise HTTPException(status_code=400, detail="Query string cannot be empty.")
     
+    doc_key = req.document or "hypertension"
+    gen = get_generator(doc_key)
+    
     try:
-        res = generator.generate(
+        res = gen.generate(
             query=req.query,
             top_k=req.top_k,
             mode=req.mode
         )
+        res["document_slug"] = doc_key
         return res
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/api/sections")
-def get_sections():
-    path = pathlib.Path("paddle_sections_output.json")
+def get_sections(document: str = Query("hypertension")):
+    if document == "hypertension":
+        path = pathlib.Path("hypertension_sections_output.json")
+    else:
+        path = pathlib.Path("paddle_sections_output.json")
+
     if not path.exists():
-        raise HTTPException(status_code=404, detail="paddle_sections_output.json not found.")
+        raise HTTPException(status_code=404, detail=f"Section file for '{document}' not found.")
 
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)

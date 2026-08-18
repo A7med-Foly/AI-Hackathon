@@ -1,10 +1,13 @@
 """
 Ingestion package for Medical RAG guideline PDFs.
-Provides PDF parsing with PyMuPDF4LLM, Section-aware chunking,
-and PaddleOCR Markdown section detection engine.
+Provides Section-aware chunking and PaddleOCR Markdown section detection engine.
 """
 
-from .pdf_parser import MedicalPDFParser
+try:
+    from .pdf_parser import MedicalPDFParser
+except ImportError:
+    MedicalPDFParser = None
+
 from .chunker import MedicalSectionChunker
 from .paddle_section_parser import PaddleSectionDetector
 

@@ -41,13 +41,15 @@ class PaddleSectionDetector:
         max_chunk_tokens: int = 600,
         min_chunk_tokens: int = 30,
         chunk_overlap_tokens: int = 100,
-        tokenizer_model: str = "cl100k_base"
+        tokenizer_model: str = "cl100k_base",
+        page_offset: int = 0
     ):
         self.document_name = document_name
         self.source_url = source_url
         self.max_chunk_tokens = max_chunk_tokens
         self.min_chunk_tokens = min_chunk_tokens
         self.chunk_overlap_tokens = chunk_overlap_tokens
+        self.page_offset = page_offset
         try:
             self.tokenizer = tiktoken.get_encoding(tokenizer_model)
         except Exception:
@@ -86,7 +88,18 @@ class PaddleSectionDetector:
         current_l2 = ""
 
         for page_idx, page_obj in enumerate(raw_pages):
-            page_num = page_idx + 1
+            pdf_page_num = page_idx + 1
+
+            if self.page_offset > 0 and pdf_page_num > self.page_offset:
+                printed_page_num = str(pdf_page_num - self.page_offset)
+            elif self.page_offset == 12 and pdf_page_num == 7:
+                printed_page_num = "v"
+            elif self.page_offset == 12 and pdf_page_num == 8:
+                printed_page_num = "vi"
+            elif self.page_offset == 12 and pdf_page_num == 9:
+                printed_page_num = "vii"
+            else:
+                printed_page_num = str(pdf_page_num)
 
             # Extract Page-Level Metadata
             if isinstance(page_obj, dict):
@@ -135,7 +148,8 @@ class PaddleSectionDetector:
                         "section_title": sec_title,
                         "parent_section": parent,
                         "hierarchy_path": h_path,
-                        "page_number": page_num,
+                        "page_number": printed_page_num,
+                        "pdf_page_number": pdf_page_num,
                         "level": level,
                         "content_lines": [clean],
                         "page_image_url": page_image_url,
@@ -155,7 +169,8 @@ class PaddleSectionDetector:
                             "section_title": "Overview",
                             "parent_section": "",
                             "hierarchy_path": [current_l1],
-                            "page_number": page_num,
+                            "page_number": printed_page_num,
+                            "pdf_page_number": pdf_page_num,
                             "level": 1,
                             "content_lines": [clean],
                             "page_image_url": page_image_url,
@@ -297,6 +312,7 @@ class PaddleSectionDetector:
                         "parent_section": sec["parent_section"],
                         "hierarchy_path": sec["hierarchy_path"],
                         "page_number": sec["page_number"],
+                        "pdf_page_number": sec.get("pdf_page_number", sec["page_number"]),
                         "content": sub_txt,
                         "token_count": self._count_tokens(sub_txt),
                         "document_name": self.document_name,
@@ -313,6 +329,7 @@ class PaddleSectionDetector:
                     "parent_section": sec["parent_section"],
                     "hierarchy_path": sec["hierarchy_path"],
                     "page_number": sec["page_number"],
+                    "pdf_page_number": sec.get("pdf_page_number", sec["page_number"]),
                     "content": content,
                     "token_count": token_count,
                     "document_name": self.document_name,
