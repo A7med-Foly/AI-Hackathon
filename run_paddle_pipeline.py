@@ -84,13 +84,20 @@ def run_paddle_pipeline(
 
 
 def auto_detect_files() -> tuple[str, str]:
-    """Finds .md and .json files in current working directory if available."""
+    """Finds .md and .json files in data/ocr or current working directory."""
+    ocr_dir = pathlib.Path("data/ocr")
+    if ocr_dir.exists():
+        md_files = list(ocr_dir.glob("*.md"))
+        json_files = list(ocr_dir.glob("*.json"))
+        if md_files and json_files:
+            return str(md_files[0]), str(json_files[0])
+
     cwd = pathlib.Path.cwd()
     md_files = [f for f in cwd.glob("*.md") if f.name not in ("README.md", "task.md", "implementation_plan.md", "walkthrough.md")]
     json_files = [f for f in cwd.glob("*.json") if f.name not in ("package.json", "paddle_sections_output.json", "tsconfig.json")]
 
-    md_path = str(md_files[0]) if md_files else "extracted_data.md"
-    json_path = str(json_files[0]) if json_files else "metadata.json"
+    md_path = str(md_files[0]) if md_files else "data/ocr/extracted_data.md"
+    json_path = str(json_files[0]) if json_files else "data/ocr/metadata.json"
     return md_path, json_path
 
 
@@ -98,7 +105,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="PaddleOCR Section Detection & JSON Export Engine")
     parser.add_argument("--md", type=str, help="Path to PaddleOCR extracted Markdown file (.md)")
     parser.add_argument("--json", type=str, help="Path to PaddleOCR metadata JSON file (.json)")
-    parser.add_argument("--output", type=str, default="paddle_sections_output.json", help="Path for output JSON file")
+    default_out = "data/processed/paddle_sections_output.json" if pathlib.Path("data/processed").exists() else "paddle_sections_output.json"
+    parser.add_argument("--output", type=str, default=default_out, help="Path for output JSON file")
     parser.add_argument("--max-tokens", type=int, default=600, help="Maximum allowed tokens per chunk (default: 600)")
     parser.add_argument("--min-tokens", type=int, default=30, help="Minimum tokens per chunk before merging (default: 30)")
     parser.add_argument("--overlap-tokens", type=int, default=100, help="Token overlap for split chunks (default: 100)")

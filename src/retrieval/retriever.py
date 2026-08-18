@@ -31,7 +31,11 @@ class ClinicalRetriever:
         """Loads chunks, populates ChromaDB vector store, and initializes BM25 keyword index."""
         path = pathlib.Path(self.json_chunks_path)
         if not path.exists():
-            raise FileNotFoundError(f"Output JSON file not found at: {self.json_chunks_path}")
+            alt_path = pathlib.Path("data/processed") / self.json_chunks_path
+            if alt_path.exists():
+                path = alt_path
+            else:
+                raise FileNotFoundError(f"Output JSON file not found at: {self.json_chunks_path}")
 
         with open(path, "r", encoding="utf-8") as f:
             payload = json.load(f)

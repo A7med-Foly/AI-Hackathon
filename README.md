@@ -78,6 +78,10 @@ python run_full_pipeline.py
 ## 📁 Project Structure
 
 ```text
+├── data/
+│   ├── raw/          # Original PDF guideline documents
+│   ├── ocr/          # Raw OCR markdown (.md) & layout json extractions
+│   └── processed/    # Structured section JSON outputs for RAG engine
 ├── src/
 │   ├── api/          # FastAPI REST endpoints & web UI server
 │   ├── generation/   # LLM clinical answer synthesis & citation engine

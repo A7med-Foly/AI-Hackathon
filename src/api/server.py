@@ -34,24 +34,33 @@ app.add_middleware(
 GENERATORS: Dict[str, ClinicalRAGGenerator] = {}
 
 
+def resolve_json_path(filename: str) -> str:
+    """Resolves JSON path, checking data/processed/ first then fallback to root."""
+    processed_path = pathlib.Path("data/processed") / filename
+    if processed_path.exists():
+        return str(processed_path)
+    return filename
+
+
 def get_generator(doc_key: str = "hypertension") -> ClinicalRAGGenerator:
     """Retrieves or initializes a ClinicalRAGGenerator for the specified document slug."""
     if doc_key in GENERATORS:
         return GENERATORS[doc_key]
 
     if doc_key == "hypertension":
-        json_path = "hypertension_sections_output.json"
+        json_path = resolve_json_path("hypertension_sections_output.json")
         coll_name = "med_guidelines_hypertension_BAAI_bge_small_en_v1_5"
     elif doc_key == "diabetes" or doc_key == "type2_diabetes":
-        json_path = "paddle_sections_output.json"
+        json_path = resolve_json_path("paddle_sections_output.json")
         coll_name = "med_guidelines_BAAI_bge_small_en_v1_5"
     else:
         # Fallback to hypertension if file exists
-        if pathlib.Path("hypertension_sections_output.json").exists():
-            json_path = "hypertension_sections_output.json"
+        hyp_path = resolve_json_path("hypertension_sections_output.json")
+        if pathlib.Path(hyp_path).exists():
+            json_path = hyp_path
             coll_name = "med_guidelines_hypertension_BAAI_bge_small_en_v1_5"
         else:
-            json_path = "paddle_sections_output.json"
+            json_path = resolve_json_path("paddle_sections_output.json")
             coll_name = "med_guidelines_BAAI_bge_small_en_v1_5"
 
     retriever = ClinicalRetriever(
@@ -74,9 +83,9 @@ class QueryRequest(BaseModel):
 @app.on_event("startup")
 def startup_event():
     print("🚀 Pre-loading Default Hypertension & Diabetes Guideline Generators...")
-    if pathlib.Path("hypertension_sections_output.json").exists():
+    if pathlib.Path(resolve_json_path("hypertension_sections_output.json")).exists():
         get_generator("hypertension")
-    if pathlib.Path("paddle_sections_output.json").exists():
+    if pathlib.Path(resolve_json_path("paddle_sections_output.json")).exists():
         get_generator("diabetes")
 
 
@@ -111,9 +120,11 @@ def process_query(req: QueryRequest):
 @app.get("/api/sections")
 def get_sections(document: str = Query("hypertension")):
     if document == "hypertension":
-        path = pathlib.Path("hypertension_sections_output.json")
+        filename = "hypertension_sections_output.json"
     else:
-        path = pathlib.Path("paddle_sections_output.json")
+        filename = "paddle_sections_output.json"
+
+    path = pathlib.Path(resolve_json_path(filename))
 
     if not path.exists():
         raise HTTPException(status_code=404, detail=f"Section file for '{document}' not found.")

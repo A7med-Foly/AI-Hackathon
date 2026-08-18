@@ -37,15 +37,19 @@ def main():
 
     json_path = pathlib.Path(args.json)
     if not json_path.exists():
-        print(f"❌ Error: JSON file '{args.json}' not found.")
-        sys.exit(1)
+        ocr_path = pathlib.Path("data/ocr") / args.json
+        if ocr_path.exists():
+            json_path = ocr_path
+        else:
+            print(f"❌ Error: JSON file '{args.json}' not found.")
+            sys.exit(1)
 
     print("=" * 70)
     print(f"🏥 Universal Guideline Ingestion: {args.doc_name}")
     print("=" * 70)
 
     # 1. Parse JSON / MD into Chunks & Section Tree
-    print(f"\n1️⃣ Parsing layout metadata from {args.json} (page_offset={args.page_offset})...")
+    print(f"\n1️⃣ Parsing layout metadata from {json_path} (page_offset={args.page_offset})...")
     detector = PaddleSectionDetector(
         document_name=args.doc_name,
         source_url="https://www.who.int/publications/i/item/9789240033987",
@@ -61,12 +65,13 @@ def main():
     chunks = parsed_payload.get("flat_chunks", [])
     tree = parsed_payload.get("hierarchy_tree", [])
 
-    output_filename = f"{args.doc_slug}_sections_output.json"
-    with open(output_filename, "w", encoding="utf-8") as f:
+    out_dir = pathlib.Path("data/processed") if pathlib.Path("data/processed").exists() else pathlib.Path(".")
+    output_filepath = out_dir / f"{args.doc_slug}_sections_output.json"
+    with open(output_filepath, "w", encoding="utf-8") as f:
         json.dump(parsed_payload, f, indent=2)
 
     print(f"   ✅ Section parsing complete: {len(tree)} root sections, {len(chunks)} chunks.")
-    print(f"   💾 Saved section structure to '{output_filename}'")
+    print(f"   💾 Saved section structure to '{output_filepath}'")
 
     # 2. Build ChromaDB Dense Vector Index
     collection_name = f"med_guidelines_{args.doc_slug}_{args.embedding_model.replace('/', '_').replace('-', '_').replace('.', '_')}"

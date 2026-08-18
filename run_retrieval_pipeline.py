@@ -6,6 +6,7 @@ Executes Hybrid BM25 + Dense Vector retrieval with Reciprocal Rank Fusion on NIC
 import sys
 import json
 import argparse
+import pathlib
 from src.retrieval.retriever import ClinicalRetriever
 
 
@@ -44,8 +45,9 @@ def format_evidence_card(idx: int, item: dict):
 
 
 def run_retrieval_pipeline(query: str = None, top_k: int = 3, mode: str = "hybrid", model_name: str = "BAAI/bge-small-en-v1.5"):
+    json_path = "data/processed/paddle_sections_output.json" if pathlib.Path("data/processed/paddle_sections_output.json").exists() else "paddle_sections_output.json"
     retriever = ClinicalRetriever(
-        json_chunks_path="paddle_sections_output.json",
+        json_chunks_path=json_path,
         embedding_model_name=model_name
     )
     retriever.initialize()

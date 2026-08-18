@@ -75,9 +75,11 @@ def run_ingestion(pdf_path: str, source_url: str = None):
 
 
 if __name__ == "__main__":
-    pdf_filename = "type-2-diabetes-in-adults-management.pdf"
+    pdf_filename = "data/raw/type-2-diabetes-in-adults-management.pdf"
     if not pathlib.Path(pdf_filename).exists():
-        print(f"Error: {pdf_filename} does not exist in workspace root.", file=sys.stderr)
-        sys.exit(1)
+        pdf_filename = "type-2-diabetes-in-adults-management.pdf"
+        if not pathlib.Path(pdf_filename).exists():
+            print(f"Error: {pdf_filename} does not exist.", file=sys.stderr)
+            sys.exit(1)
 
     run_ingestion(pdf_filename)
