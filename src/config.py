@@ -70,13 +70,13 @@ SPARSE_SEARCH_WEIGHT = 0.4
 # ==============================================================================
 # 6. LLM & GENERATION CONFIGURATION
 # ==============================================================================
-DEFAULT_LLM_MODEL = "groq/llama-3.3-70b-versatile"
+DEFAULT_LLM_MODEL = "openai/gpt-4o-mini"
 LLM_TEMPERATURE = 0.1
 LLM_MAX_TOKENS = 1024
 
 LLM_FALLBACK_MODELS = [
-    "groq/llama-3.3-70b-versatile",
     "openai/gpt-4o-mini",
+    "meta-llama/llama-3.3-70b-instruct",
     "google/gemma-4-31b-it:free"
 ]
 

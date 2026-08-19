@@ -68,10 +68,15 @@ class VectorStoreManager:
         flat_chunks = payload.get("flat_chunks", [])
         return self.ingest_chunks(flat_chunks)
 
-    def ingest_chunks(self, chunks: List[Dict[str, Any]]) -> int:
+    def ingest_chunks(self, chunks: List[Dict[str, Any]], clear_existing: bool = True) -> int:
         """Ingests a list of dictionary chunk items into ChromaDB."""
         if not chunks:
             return 0
+
+        if clear_existing and self.collection.count() > 0:
+            existing_ids = self.collection.get()['ids']
+            if existing_ids:
+                self.collection.delete(ids=existing_ids)
 
         ids = []
         documents = []

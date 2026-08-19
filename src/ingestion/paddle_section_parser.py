@@ -98,6 +98,12 @@ class PaddleSectionDetector:
                 printed_page_num = "vi"
             elif self.page_offset == 12 and pdf_page_num == 9:
                 printed_page_num = "vii"
+            elif self.page_offset == 12 and pdf_page_num == 10:
+                printed_page_num = "viii"
+            elif self.page_offset == 12 and pdf_page_num == 11:
+                printed_page_num = "ix"
+            elif self.page_offset == 12 and pdf_page_num == 12:
+                printed_page_num = "x"
             else:
                 printed_page_num = str(pdf_page_num)
 
