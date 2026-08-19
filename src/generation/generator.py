@@ -8,6 +8,7 @@ import os
 import json
 import pathlib
 from typing import List, Dict, Any, Optional
+from src import config
 from src.retrieval.retriever import ClinicalRetriever
 
 
@@ -39,7 +40,7 @@ class ClinicalRAGGenerator:
     def __init__(
         self,
         retriever: Optional[ClinicalRetriever] = None,
-        model_name: str = "openai/gpt-4o-mini",
+        model_name: str = config.DEFAULT_LLM_MODEL,
         api_key: Optional[str] = None
     ):
         self.retriever = retriever or ClinicalRetriever()
@@ -53,7 +54,7 @@ class ClinicalRAGGenerator:
         base_url = "https://openrouter.ai/api/v1" if "openrouter" in self.api_key.lower() or os.environ.get("OPENROUTER_API_KEY") else None
         self.llm_client = OpenAI(api_key=self.api_key, base_url=base_url)
 
-    def generate(self, query: str, top_k: int = 4, mode: str = "hybrid") -> Dict[str, Any]:
+    def generate(self, query: str, top_k: int = config.DEFAULT_TOP_K, mode: str = config.DEFAULT_SEARCH_MODE) -> Dict[str, Any]:
         """
         Executes hybrid retrieval and generates an evidence-grounded clinical response with structured citations using LLM.
         """
@@ -124,13 +125,7 @@ class ClinicalRAGGenerator:
         ]
         
         # Candidate models list for automatic failover
-        models_to_try = [
-            self.model_name,
-            # "openai/gpt-oss-20b:free",
-            # "z-ai/glm-5.2:free",
-            # "nvidia/nemotron-3.5-lightning:free",
-            "google/gemma-4-31b-it:free"
-        ]
+        models_to_try = [self.model_name] + config.LLM_FALLBACK_MODELS
         
         # Remove duplicates while preserving order
         seen = set()
@@ -142,8 +137,8 @@ class ClinicalRAGGenerator:
                 response = self.llm_client.chat.completions.create(
                     model=m,
                     messages=messages,
-                    temperature=0.1,
-                    max_tokens=1024
+                    temperature=config.LLM_TEMPERATURE,
+                    max_tokens=config.LLM_MAX_TOKENS
                 )
                 if response and response.choices and response.choices[0].message.content:
                     return response.choices[0].message.content

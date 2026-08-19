@@ -1,60 +1,57 @@
 """
 Universal Document Ingestion & Indexing Pipeline CLI.
-Ingests any target PaddleOCR (.json / .md) guideline into ChromaDB Vector Store.
+Ingests Medical Guideline layout metadata into ChromaDB Vector Store.
+Uses centralized parameters from src/config.py.
+
 Usage:
-  python ingest_document.py \
-    --json Guideline-for-the-pharmacological-treatment-of-hypertension-in-adults.json \
-    --md Guideline-for-the-pharmacological-treatment-of-hypertension-in-adults.md \
-    --doc-name "Guideline for the pharmacological treatment of hypertension in adults" \
-    --doc-slug "hypertension" \
-    --page-offset 12
+    python ingest_document.py
 """
 
-import os
 import sys
 import json
 import argparse
 import pathlib
 
+from src import config
 from src.ingestion.paddle_section_parser import PaddleSectionDetector
 from src.retrieval.vector_store import VectorStoreManager
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Ingest any Medical Guideline OCR output into ChromaDB & BM25.")
-    parser.add_argument("--json", required=True, help="Path to PaddleOCR .json layout file")
-    parser.add_argument("--md", required=False, help="Path to PaddleOCR .md text file")
-    parser.add_argument("--doc-name", default="Medical Guideline", help="Full title of the document")
-    parser.add_argument("--doc-slug", default="hypertension", help="Short slug identifier (e.g. hypertension)")
-    parser.add_argument("--page-offset", type=int, default=0, help="Number of front-matter cover pages before Page 1")
-    parser.add_argument("--embedding-model", default="BAAI/bge-small-en-v1.5", help="SentenceTransformer model name")
-    parser.add_argument("--chroma-dir", default="./chroma_db", help="ChromaDB persistence directory")
+    parser = argparse.ArgumentParser(description="Ingest Medical Guideline (PaddleOCR JSON layout) into ChromaDB & BM25 index.")
+    parser.add_argument("--json", default=config.DEFAULT_OCR_JSON_PATH, help=f"Path to PaddleOCR layout JSON (default: {config.DEFAULT_OCR_JSON_PATH})")
+    parser.add_argument("--doc-name", default=config.DEFAULT_DOCUMENT_NAME, help=f"Full title of document (default: '{config.DEFAULT_DOCUMENT_NAME}')")
+    parser.add_argument("--doc-slug", default=config.DEFAULT_DOCUMENT_SLUG, help=f"Short slug identifier (default: '{config.DEFAULT_DOCUMENT_SLUG}')")
+    parser.add_argument("--page-offset", type=int, default=config.DEFAULT_PAGE_OFFSET, help=f"Front-matter cover page offset (default: {config.DEFAULT_PAGE_OFFSET})")
+    parser.add_argument("--embedding-model", default=config.EMBEDDING_MODEL_NAME, help=f"SentenceTransformer embedding model (default: {config.EMBEDDING_MODEL_NAME})")
+    parser.add_argument("--chroma-dir", default=config.CHROMA_PERSIST_DIR, help=f"ChromaDB persistence directory (default: {config.CHROMA_PERSIST_DIR})")
+    parser.add_argument("--output", default=config.DEFAULT_PROCESSED_JSON_PATH, help=f"Path for output section JSON (default: {config.DEFAULT_PROCESSED_JSON_PATH})")
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
 
+    print("=" * 70)
+    print(f"🏥 Medical Guideline Ingestion: {args.doc_name}")
+    print("=" * 70)
+
     json_path = pathlib.Path(args.json)
     if not json_path.exists():
-        ocr_path = pathlib.Path("data/ocr") / args.json
+        ocr_path = config.DATA_OCR_DIR / args.json
         if ocr_path.exists():
             json_path = ocr_path
         else:
-            print(f"❌ Error: JSON file '{args.json}' not found.")
+            print(f"❌ Error: Layout JSON file '{args.json}' not found.", file=sys.stderr)
             sys.exit(1)
 
-    print("=" * 70)
-    print(f"🏥 Universal Guideline Ingestion: {args.doc_name}")
-    print("=" * 70)
-
-    # 1. Parse JSON / MD into Chunks & Section Tree
-    print(f"\n1️⃣ Parsing layout metadata from {json_path} (page_offset={args.page_offset})...")
+    print(f"\n1️⃣ Parsing layout metadata from '{json_path}' (page_offset={args.page_offset})...")
     detector = PaddleSectionDetector(
         document_name=args.doc_name,
-        source_url="https://www.who.int/publications/i/item/9789240033987",
-        max_chunk_tokens=600,
-        chunk_overlap_tokens=100,
+        source_url=config.DEFAULT_SOURCE_URL,
+        max_chunk_tokens=config.MAX_CHUNK_TOKENS,
+        min_chunk_tokens=config.MIN_CHUNK_TOKENS,
+        chunk_overlap_tokens=config.CHUNK_OVERLAP_TOKENS,
         page_offset=args.page_offset
     )
 
@@ -65,10 +62,10 @@ def main():
     chunks = parsed_payload.get("flat_chunks", [])
     tree = parsed_payload.get("hierarchy_tree", [])
 
-    out_dir = pathlib.Path("data/processed") if pathlib.Path("data/processed").exists() else pathlib.Path(".")
-    output_filepath = out_dir / f"{args.doc_slug}_sections_output.json"
+    output_filepath = pathlib.Path(args.output)
+    output_filepath.parent.mkdir(parents=True, exist_ok=True)
     with open(output_filepath, "w", encoding="utf-8") as f:
-        json.dump(parsed_payload, f, indent=2)
+        json.dump(parsed_payload, f, indent=2, ensure_ascii=False)
 
     print(f"   ✅ Section parsing complete: {len(tree)} root sections, {len(chunks)} chunks.")
     print(f"   💾 Saved section structure to '{output_filepath}'")
@@ -76,7 +73,7 @@ def main():
     # 2. Build ChromaDB Dense Vector Index
     collection_name = f"med_guidelines_{args.doc_slug}_{args.embedding_model.replace('/', '_').replace('-', '_').replace('.', '_')}"
     print(f"\n2️⃣ Indexing dense vector embeddings into ChromaDB collection '{collection_name}'...")
-    
+
     vec_manager = VectorStoreManager(
         persist_dir=args.chroma_dir,
         collection_name=collection_name,
@@ -87,7 +84,7 @@ def main():
     print("\n" + "=" * 70)
     print(f"🎉 Ingestion & Indexing Complete for '{args.doc_name}'!")
     print(f"   - ChromaDB Collection: {collection_name}")
-    print(f"   - Section Output File: {output_filename}")
+    print(f"   - Section Output File: {output_filepath}")
     print("=" * 70)
 
 

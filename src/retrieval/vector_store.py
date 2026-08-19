@@ -8,14 +8,15 @@ import pathlib
 from typing import List, Dict, Any, Optional
 import chromadb
 from chromadb.utils import embedding_functions
+from src import config
 
 
 class VectorStoreManager:
     def __init__(
         self,
         collection_name: Optional[str] = None,
-        persist_dir: str = "./chroma_db",
-        embedding_model_name: str = "BAAI/bge-small-en-v1.5"
+        persist_dir: str = config.CHROMA_PERSIST_DIR,
+        embedding_model_name: str = config.EMBEDDING_MODEL_NAME
     ):
         self.persist_dir = persist_dir
         self.embedding_model_name = embedding_model_name
@@ -23,8 +24,7 @@ class VectorStoreManager:
         
         # Derive isolated collection name based on model to prevent embedding conflicts
         if not collection_name:
-            model_slug = embedding_model_name.replace("/", "_").replace("-", "_").replace(".", "_")
-            self.collection_name = f"med_guidelines_{model_slug}"
+            self.collection_name = config.DEFAULT_COLLECTION_NAME
         else:
             self.collection_name = collection_name
 
@@ -56,7 +56,7 @@ class VectorStoreManager:
             else:
                 raise e
 
-    def ingest_chunks_from_json(self, json_path: str = "paddle_sections_output.json") -> int:
+    def ingest_chunks_from_json(self, json_path: str = config.DEFAULT_PROCESSED_JSON_PATH) -> int:
         """Ingests flat RAG chunks from paddle_sections_output.json into ChromaDB vector collection."""
         path = pathlib.Path(json_path)
         if not path.exists():

@@ -12,6 +12,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from src import config
 from src.generation.generator import ClinicalRAGGenerator
 from src.retrieval.retriever import ClinicalRetriever
 
@@ -36,32 +37,26 @@ GENERATORS: Dict[str, ClinicalRAGGenerator] = {}
 
 def resolve_json_path(filename: str) -> str:
     """Resolves JSON path, checking data/processed/ first then fallback to root."""
-    processed_path = pathlib.Path("data/processed") / filename
+    processed_path = config.DATA_PROCESSED_DIR / filename
     if processed_path.exists():
         return str(processed_path)
     return filename
 
 
-def get_generator(doc_key: str = "hypertension") -> ClinicalRAGGenerator:
+def get_generator(doc_key: str = config.DEFAULT_DOCUMENT_SLUG) -> ClinicalRAGGenerator:
     """Retrieves or initializes a ClinicalRAGGenerator for the specified document slug."""
     if doc_key in GENERATORS:
         return GENERATORS[doc_key]
 
-    if doc_key == "hypertension":
+    if doc_key == config.DEFAULT_DOCUMENT_SLUG or doc_key == "hypertension":
         json_path = resolve_json_path("hypertension_sections_output.json")
-        coll_name = "med_guidelines_hypertension_BAAI_bge_small_en_v1_5"
+        coll_name = config.DEFAULT_COLLECTION_NAME
     elif doc_key == "diabetes" or doc_key == "type2_diabetes":
         json_path = resolve_json_path("paddle_sections_output.json")
         coll_name = "med_guidelines_BAAI_bge_small_en_v1_5"
     else:
-        # Fallback to hypertension if file exists
-        hyp_path = resolve_json_path("hypertension_sections_output.json")
-        if pathlib.Path(hyp_path).exists():
-            json_path = hyp_path
-            coll_name = "med_guidelines_hypertension_BAAI_bge_small_en_v1_5"
-        else:
-            json_path = resolve_json_path("paddle_sections_output.json")
-            coll_name = "med_guidelines_BAAI_bge_small_en_v1_5"
+        json_path = config.DEFAULT_PROCESSED_JSON_PATH
+        coll_name = config.DEFAULT_COLLECTION_NAME
 
     retriever = ClinicalRetriever(
         json_chunks_path=json_path,
@@ -75,9 +70,9 @@ def get_generator(doc_key: str = "hypertension") -> ClinicalRAGGenerator:
 
 class QueryRequest(BaseModel):
     query: str
-    document: Optional[str] = "hypertension"
-    top_k: int = 4
-    mode: str = "hybrid"
+    document: Optional[str] = config.DEFAULT_DOCUMENT_SLUG
+    top_k: int = config.DEFAULT_TOP_K
+    mode: str = config.DEFAULT_SEARCH_MODE
 
 
 @app.on_event("startup")

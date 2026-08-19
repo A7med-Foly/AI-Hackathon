@@ -5,8 +5,8 @@ FastAPI API Backend, and Evidence-Grounded Generator.
 """
 
 import os
-import sys
 import uvicorn
+from src import config
 from src.generation.generator import ClinicalRAGGenerator
 
 
@@ -16,8 +16,8 @@ def main():
     print("=" * 70)
 
     # Launch FastAPI Server with Visual Evidence Grounding UI Panel
-    print("\n🌐 Starting FastAPI Web Server at http://127.0.0.1:8000 ...")
-    uvicorn.run("src.api.server:app", host="127.0.0.1", port=8000, reload=False)
+    print(f"\n🌐 Starting FastAPI Web Server at http://{config.SERVER_HOST}:{config.SERVER_PORT} ...")
+    uvicorn.run("src.api.server:app", host=config.SERVER_HOST, port=config.SERVER_PORT, reload=False)
 
 
 if __name__ == "__main__":

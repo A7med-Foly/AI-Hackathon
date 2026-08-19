@@ -8,18 +8,19 @@ import sys
 import json
 import argparse
 import pathlib
+from src import config
 from src.ingestion.paddle_section_parser import PaddleSectionDetector
 
 
 def run_paddle_pipeline(
     md_path: str,
     json_path: str = None,
-    output_json_path: str = "paddle_sections_output.json",
-    doc_name: str = "type-2-diabetes-in-adults-management.pdf",
-    source_url: str = "https://www.nice.org.uk/guidance/ng28",
-    max_chunk_tokens: int = 600,
-    min_chunk_tokens: int = 30,
-    chunk_overlap_tokens: int = 100
+    output_json_path: str = config.DEFAULT_PROCESSED_JSON_PATH,
+    doc_name: str = config.DEFAULT_DOCUMENT_NAME,
+    source_url: str = config.DEFAULT_SOURCE_URL,
+    max_chunk_tokens: int = config.MAX_CHUNK_TOKENS,
+    min_chunk_tokens: int = config.MIN_CHUNK_TOKENS,
+    chunk_overlap_tokens: int = config.CHUNK_OVERLAP_TOKENS
 ):
     print(f"=== [PaddleOCR Section Detection Pipeline] Processing: {md_path} ===")
     

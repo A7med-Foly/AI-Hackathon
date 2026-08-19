@@ -6,6 +6,7 @@ Coordinates ChromaDB VectorStoreManager (supporting BAAI/bge-small-en-v1.5) and 
 import json
 import pathlib
 from typing import List, Dict, Any, Optional
+from src import config
 from src.retrieval.vector_store import VectorStoreManager
 from src.retrieval.hybrid_search import HybridSearchEngine
 
@@ -13,10 +14,10 @@ from src.retrieval.hybrid_search import HybridSearchEngine
 class ClinicalRetriever:
     def __init__(
         self,
-        json_chunks_path: str = "paddle_sections_output.json",
-        persist_dir: str = "./chroma_db",
-        collection_name: Optional[str] = None,
-        embedding_model_name: str = "BAAI/bge-small-en-v1.5"
+        json_chunks_path: str = config.DEFAULT_PROCESSED_JSON_PATH,
+        persist_dir: str = config.CHROMA_PERSIST_DIR,
+        collection_name: Optional[str] = config.DEFAULT_COLLECTION_NAME,
+        embedding_model_name: str = config.EMBEDDING_MODEL_NAME
     ):
         self.json_chunks_path = json_chunks_path
         self.vector_store = VectorStoreManager(

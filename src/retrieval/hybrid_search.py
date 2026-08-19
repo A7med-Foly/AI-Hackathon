@@ -6,10 +6,11 @@ Crucial for clinical RAG: ensures exact drug names (e.g. Metformin, SGLT-2) & se
 import re
 from typing import List, Dict, Any, Optional
 from rank_bm25 import BM25Okapi
+from src import config
 
 
 class HybridSearchEngine:
-    def __init__(self, k_rrf: int = 60):
+    def __init__(self, k_rrf: int = config.RRF_K_CONSTANT):
         self.k_rrf = k_rrf
         self.chunks: List[Dict[str, Any]] = []
         self.bm25: Optional[BM25Okapi] = None
