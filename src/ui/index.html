@@ -299,6 +299,32 @@
       color: var(--text-muted);
     }
 
+    .inline-citation-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      margin: 2px 3px;
+      border-radius: 6px;
+      background: rgba(16, 185, 129, 0.18);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      font-size: 11.5px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      vertical-align: baseline;
+    }
+
+    .inline-citation-badge:hover {
+      background: rgba(16, 185, 129, 0.35);
+      border-color: #10b981;
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+      transform: translateY(-1px);
+    }
+
     /* Right Pane: Visual Evidence Grounding Panel */
     .right-pane {
       flex: 1;
@@ -551,7 +577,28 @@
       const chatScroll = document.getElementById('chat-scroll');
       currentCitations = data.citations || [];
 
-      let formattedAnswer = data.answer;
+      let formattedAnswer = data.answer || '';
+      
+      // 1. Split any combined semicolon citations inside single brackets, e.g. [Section A, Page B; Section C, Page D]
+      formattedAnswer = formattedAnswer.replace(/\[(.*?)\]/g, (match, content) => {
+        if (content.includes(';')) {
+          const parts = content.split(';').map(p => p.trim()).filter(Boolean);
+          return parts.map(p => `[${p}]`).join('');
+        }
+        return match;
+      });
+
+      // 2. Convert all bracketed citations into interactive inline clickable buttons
+      formattedAnswer = formattedAnswer.replace(/\[(Section [^\]]+?|Page [^\]]+?)\]/gi, (match, citationStr) => {
+        // Find matching citation chunk in currentCitations list
+        let matchedIdx = currentCitations.findIndex(c => {
+          const sec = (c.section_number || '').toString().trim();
+          const page = (c.page_number || '').toString().trim();
+          return (sec && citationStr.includes(sec)) || (page && citationStr.includes(page));
+        });
+        const targetIdx = matchedIdx >= 0 ? matchedIdx : 0;
+        return `<button class="inline-citation-badge" onclick="selectCitation(${targetIdx})"><i class="fa-solid fa-bookmark"></i> ${citationStr}</button>`;
+      });
       
       let html = `
         <div class="response-card">

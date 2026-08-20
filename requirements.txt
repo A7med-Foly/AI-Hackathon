@@ -8,4 +8,5 @@ langchain
 langchain-core
 langchain-openai
 fastapi
-uvicorn 
+uvicorn
+tiktoken

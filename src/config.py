@@ -76,16 +76,18 @@ LLM_MAX_TOKENS = 1024
 
 LLM_FALLBACK_MODELS = [
     "openai/gpt-4o-mini",
+    "openai/gpt-oss-20b:free"
     "meta-llama/llama-3.3-70b-instruct",
-    "google/gemma-4-31b-it:free"
+    "google/gemma-4-31b-it:free",
+    "google/gemma-4-26b-a4b-it:free"
 ]
 
 
 # ==============================================================================
 # 7. FASTAPI WEB SERVER CONFIGURATION
 # ==============================================================================
-SERVER_HOST = "127.0.0.1"
-SERVER_PORT = 8000
+SERVER_HOST = os.getenv("SERVER_HOST", "0.0.0.0")
+SERVER_PORT = int(os.getenv("PORT", os.getenv("SERVER_PORT", "7860")))
 
 
 # ==============================================================================
