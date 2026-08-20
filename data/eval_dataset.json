@@ -1,0 +1,227 @@
+[
+  {
+    "query_id": "hyp_q1",
+    "document": "hypertension",
+    "question": "What initial drug classes are recommended by WHO for adults requiring pharmacological treatment for hypertension?",
+    "ground_truth": "For adults with hypertension requiring pharmacological treatment, WHO recommends initial treatment with drugs from any of the following three classes: 1) thiazide and thiazide-like agents, 2) angiotensin-converting enzyme inhibitors (ACEis) / angiotensin-receptor blockers (ARBs), and 3) long-acting dihydropyridine calcium channel blockers (CCBs).",
+    "expected_sections": ["4", "3.4"],
+    "expected_pages": ["11"],
+    "metadata": {
+      "page_number": "11",
+      "section_title": "RECOMMENDATION ON DRUG CLASSES TO BE USED AS FIRST-LINE AGENTS",
+      "chunk_id": "paddle_p11_c72",
+      "expected_sections": ["4", "3.4"]
+    },
+    "category": "DIRECT"
+  },
+  {
+    "query_id": "hyp_q2",
+    "document": "hypertension",
+    "question": "What is the recommended target blood pressure treatment goal for hypertensive patients without comorbidities?",
+    "ground_truth": "WHO strongly recommends a target blood pressure treatment goal of <140/90 mmHg in all patients with hypertension without comorbidities.",
+    "expected_sections": ["6", "3.6"],
+    "expected_pages": ["16"],
+    "metadata": {
+      "page_number": "16",
+      "section_title": "Target blood pressure",
+      "chunk_id": "paddle_p16_c83",
+      "expected_sections": ["6", "3.6"]
+    },
+    "category": "DIRECT"
+  },
+  {
+    "query_id": "hyp_q3",
+    "document": "hypertension",
+    "question": "What is the recommended re-assessment frequency for patients after initiating or modifying antihypertensive therapy?",
+    "ground_truth": "WHO suggests a monthly follow-up after initiation or a change in antihypertensive medications until patients reach target blood pressure, and a follow-up every 3 to 6 months for patients whose blood pressure is under control.",
+    "expected_sections": ["7", "3.7"],
+    "expected_pages": ["17"],
+    "metadata": {
+      "page_number": "17",
+      "section_title": "Frequency of re-assessment",
+      "chunk_id": "paddle_p17_c86_sub1",
+      "expected_sections": ["7", "3.7"]
+    },
+    "category": "DIRECT"
+  },
+  {
+    "query_id": "hyp_q4",
+    "document": "hypertension",
+    "question": "Can nonphysician healthcare providers such as pharmacists and nurses administer pharmacological hypertension treatment?",
+    "ground_truth": "WHO suggests that pharmacological treatment of hypertension can be provided by nonphysician professionals such as pharmacists and nurses, provided proper training, prescribing authority, specific management protocols, and physician oversight are established.",
+    "expected_sections": ["8", "3.8"],
+    "expected_pages": ["19"],
+    "metadata": {
+      "page_number": "19",
+      "section_title": "RECOMMENDATION ON TREATMENT BY NONPHYSICIAN PROFESSIONALS",
+      "chunk_id": "paddle_p19_c89",
+      "expected_sections": ["8", "3.8"]
+    },
+    "category": "DIRECT"
+  },
+  {
+    "query_id": "hyp_q5",
+    "document": "hypertension",
+    "question": "Summarize the complete clinical diagnostic and therapeutic sequence from initial hypertension diagnosis to long-term follow-up.",
+    "ground_truth": "Pharmacological treatment should be initiated within 4 weeks of confirmed diagnosis (or immediately if BP >= 160/100 mmHg). Baseline laboratory testing (electrolytes, creatinine, glucose/HbA1c, lipids, urine dipstick, ECG) should be obtained if feasible without delaying treatment. First-line therapy consists of thiazide/thiazide-like diuretics, ACEi/ARBs, or CCBs, preferably as a single-pill combination. Follow-up is monthly until BP goal (<140/90 mmHg or <130 mmHg for high risk) is achieved, followed by re-assessment every 3 to 6 months.",
+    "expected_sections": ["1", "2", "4", "6", "7", "3.1", "3.2", "3.4", "3.6", "3.7"],
+    "expected_pages": ["7", "8", "11", "16", "17"],
+    "metadata": {
+      "page_number": "7, 8, 11, 16, 17",
+      "section_title": "Initiation, Laboratory, First-line, Target, Frequency",
+      "chunk_id": "paddle_p7_c61, paddle_p8_c64, paddle_p11_c72, paddle_p16_c83, paddle_p17_c86_sub1",
+      "expected_sections": ["1", "2", "4", "6", "7", "3.1", "3.2", "3.4", "3.6", "3.7"]
+    },
+    "category": "MULTI_CHUNK"
+  },
+  {
+    "query_id": "hyp_q6",
+    "document": "hypertension",
+    "question": "When should combination therapy be preferred over monotherapy, and what drug combinations are recommended?",
+    "ground_truth": "WHO suggests combination therapy, preferably as a single-pill combination (SPC) to improve adherence, as initial treatment for adults requiring pharmacological intervention. It is especially valuable when baseline BP is >= 20/10 mmHg higher than target blood pressure. Combination therapy should select drugs from diuretics (thiazide/thiazide-like), ACEi/ARBs, and long-acting dihydropyridine CCBs.",
+    "expected_sections": ["5", "3.5", "Algorithm 1"],
+    "expected_pages": ["13", "28"],
+    "metadata": {
+      "page_number": "13, 28",
+      "section_title": "RECOMMENDATION ON COMBINATION THERAPY & Algorithm 1",
+      "chunk_id": "paddle_p13_c80, paddle_p28_c112_sub1",
+      "expected_sections": ["5", "3.5", "Algorithm 1"]
+    },
+    "category": "MULTI_CHUNK"
+  },
+  {
+    "query_id": "hyp_q7",
+    "document": "hypertension",
+    "question": "How does laboratory resource availability affect the timing of treatment initiation and choice of initial antihypertensive drug class?",
+    "ground_truth": "Baseline laboratory testing screens for comorbidities but should never delay treatment initiation. In low-resourced or non-clinical settings lacking laboratory access, long-acting dihydropyridine calcium channel blockers (CCBs) are more suitable for initiation without testing compared to diuretics or ACEi/ARBs, and laboratory testing can be conducted subsequently during follow-up.",
+    "expected_sections": ["2", "3", "3.2", "3.3"],
+    "expected_pages": ["8", "10"],
+    "metadata": {
+      "page_number": "8, 10",
+      "section_title": "Laboratory testing & CVD Risk Assessment",
+      "chunk_id": "paddle_p8_c64, paddle_p10_c68",
+      "expected_sections": ["2", "3", "3.2", "3.3"]
+    },
+    "category": "MULTI_CHUNK"
+  },
+  {
+    "query_id": "hyp_q8",
+    "document": "hypertension",
+    "question": "What role does cardiovascular disease risk assessment play in determining the threshold and timing for initiating hypertension medication?",
+    "ground_truth": "CVD risk assessment is suggested at or after initiation of treatment, provided it does not delay therapy. For patients with SBP >= 140 mmHg or DBP >= 90 mmHg, treatment is indicated regardless of risk assessment. CVD risk scoring is most critical for guiding treatment decisions in individuals with lower SBP levels (130-139 mmHg) without existing CVD.",
+    "expected_sections": ["1", "3", "3.1", "3.3"],
+    "expected_pages": ["7", "10"],
+    "metadata": {
+      "page_number": "7, 10",
+      "section_title": "Blood pressure threshold & CVD Risk Assessment",
+      "chunk_id": "paddle_p7_c61, paddle_p10_c68",
+      "expected_sections": ["1", "3", "3.1", "3.3"]
+    },
+    "category": "MULTI_CHUNK"
+  },
+  {
+    "query_id": "hyp_q9",
+    "document": "hypertension",
+    "question": "What is the recommended systolic blood pressure threshold and treatment target for patients with existing cardiovascular disease (CVD)?",
+    "ground_truth": "For individuals with existing cardiovascular disease (CVD) and systolic blood pressure of 130–139 mmHg, WHO strongly recommends initiating pharmacological treatment and achieving a target systolic blood pressure goal of <130 mmHg.",
+    "expected_sections": ["1", "6", "3.1", "3.6"],
+    "expected_pages": ["7", "16"],
+    "metadata": {
+      "page_number": "7, 16",
+      "section_title": "Blood pressure threshold & Target blood pressure",
+      "chunk_id": "paddle_p7_c61, paddle_p16_c83",
+      "expected_sections": ["1", "6", "3.1", "3.6"]
+    },
+    "category": "SPECIFIC_POPULATION"
+  },
+  {
+    "query_id": "hyp_q10",
+    "document": "hypertension",
+    "question": "What systolic blood pressure threshold and target goal are suggested for high-risk patients with diabetes mellitus or chronic kidney disease (CKD)?",
+    "ground_truth": "For patients without CVD but with high cardiovascular risk, diabetes mellitus, or chronic kidney disease (CKD) and SBP of 130–139 mmHg, WHO suggests initiating pharmacological antihypertensive treatment and maintaining a target systolic blood pressure goal of <130 mmHg.",
+    "expected_sections": ["1", "6", "3.1", "3.6"],
+    "expected_pages": ["7", "16"],
+    "metadata": {
+      "page_number": "7, 16",
+      "section_title": "Blood pressure threshold & Target blood pressure",
+      "chunk_id": "paddle_p7_c61, paddle_p16_c83",
+      "expected_sections": ["1", "6", "3.1", "3.6"]
+    },
+    "category": "SPECIFIC_POPULATION"
+  },
+  {
+    "query_id": "hyp_q11",
+    "document": "hypertension",
+    "question": "How should patients presenting with severely elevated blood pressure (systolic >= 160 mmHg or diastolic >= 100 mmHg) be managed initially?",
+    "ground_truth": "If blood pressure is severely elevated (systolic >= 160 mmHg or diastolic >= 100 mmHg) or accompanied by evidence of target organ damage, initiation of pharmacological treatment should be started immediately without delay.",
+    "expected_sections": ["1", "3.1"],
+    "expected_pages": ["7"],
+    "metadata": {
+      "page_number": "7",
+      "section_title": "Blood pressure threshold for initiation of pharmacological treatment",
+      "chunk_id": "paddle_p7_c61",
+      "expected_sections": ["1", "3.1"]
+    },
+    "category": "SPECIFIC_POPULATION"
+  },
+  {
+    "query_id": "hyp_q12",
+    "document": "hypertension",
+    "question": "What are the specific therapeutic recommendations for patients presenting with baseline blood pressure >= 20/10 mmHg above target?",
+    "ground_truth": "Beginning treatment with two antihypertensive drugs from different classes (preferably as a single-pill combination) is recommended when baseline BP is >= 20/10 mmHg above target to optimize blood pressure control and treatment adherence.",
+    "expected_sections": ["5", "3.5", "Algorithm 1"],
+    "expected_pages": ["13", "28"],
+    "metadata": {
+      "page_number": "13, 28",
+      "section_title": "RECOMMENDATION ON COMBINATION THERAPY & Algorithm 1",
+      "chunk_id": "paddle_p13_c80, paddle_p28_c112_sub1",
+      "expected_sections": ["5", "3.5", "Algorithm 1"]
+    },
+    "category": "SPECIFIC_POPULATION"
+  },
+  {
+    "query_id": "hyp_q13",
+    "document": "hypertension",
+    "question": "What are the recommended dosage adjustments for Metformin in patients with type 2 diabetes and diabetic nephropathy?",
+    "ground_truth": "Out of Scope: This guideline focuses strictly on the pharmacological treatment of hypertension in adults. Recommendations regarding Metformin dosing and glycemic management for type 2 diabetes are not addressed in this document.",
+    "expected_sections": ["N/A"],
+    "expected_pages": ["N/A"],
+    "metadata": {
+      "page_number": "N/A",
+      "section_title": "N/A",
+      "chunk_id": "N/A",
+      "expected_sections": ["N/A"]
+    },
+    "category": "OUT_OF_SCOPE"
+  },
+  {
+    "query_id": "hyp_q14",
+    "document": "hypertension",
+    "question": "What is the recommended pharmacological management for acute severe hypertension or preeclampsia in pregnant women?",
+    "ground_truth": "Out of Scope: This guideline explicitly focuses on non-pregnant adults with essential hypertension. Treatment protocols for hypertension during pregnancy, preeclampsia, or acute hypertensive emergencies in pregnant women are not covered in this document.",
+    "expected_sections": ["N/A"],
+    "expected_pages": ["N/A"],
+    "metadata": {
+      "page_number": "N/A",
+      "section_title": "N/A",
+      "chunk_id": "N/A",
+      "expected_sections": ["N/A"]
+    },
+    "category": "OUT_OF_SCOPE"
+  },
+  {
+    "query_id": "hyp_q15",
+    "document": "hypertension",
+    "question": "What specific surgical interventions or renal artery stenting protocols are indicated for secondary hypertension due to renal artery stenosis?",
+    "ground_truth": "Out of Scope: This document provides recommendations exclusively on pharmacological antihypertensive treatment in adults. Surgical interventions, angioplasty, or renal artery stenting procedures for secondary hypertension are not covered.",
+    "expected_sections": ["N/A"],
+    "expected_pages": ["N/A"],
+    "metadata": {
+      "page_number": "N/A",
+      "section_title": "N/A",
+      "chunk_id": "N/A",
+      "expected_sections": ["N/A"]
+    },
+    "category": "OUT_OF_SCOPE"
+  }
+]

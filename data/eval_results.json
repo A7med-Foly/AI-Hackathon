@@ -1,0 +1,648 @@
+{
+  "dataset_size": 15,
+  "top_k": 4,
+  "summary_by_mode": {
+    "hybrid": {
+      "mean_hit_rate": 0.6667,
+      "mean_mrr": 0.5778,
+      "mean_precision": 0.4333,
+      "mean_recall": 0.6389,
+      "mean_faithfulness": 0.0,
+      "mean_answer_relevance": 0.0
+    },
+    "dense": {
+      "mean_hit_rate": 0.7333,
+      "mean_mrr": 0.6167,
+      "mean_precision": 0.4167,
+      "mean_recall": 0.6278,
+      "mean_faithfulness": 0.0,
+      "mean_answer_relevance": 0.0
+    },
+    "bm25": {
+      "mean_hit_rate": 0.8,
+      "mean_mrr": 0.6222,
+      "mean_precision": 0.45,
+      "mean_recall": 0.6567,
+      "mean_faithfulness": 0.0,
+      "mean_answer_relevance": 0.0
+    }
+  },
+  "generation_summary": {
+    "mean_hit_rate": 0.0,
+    "mean_mrr": 0.0,
+    "mean_precision": 0.0,
+    "mean_recall": 0.0,
+    "mean_faithfulness": 0.194,
+    "mean_answer_relevance": 0.7451
+  },
+  "mode_detailed_results": {
+    "hybrid": [
+      {
+        "query_id": "hyp_q1",
+        "question": "What initial drug classes are recommended by WHO for adults requiring pharmacological treatment for hypertension?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "hybrid"
+      },
+      {
+        "query_id": "hyp_q2",
+        "question": "What is the recommended target blood pressure treatment goal for hypertensive patients without comorbidities?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "hybrid"
+      },
+      {
+        "query_id": "hyp_q3",
+        "question": "What is the recommended re-assessment frequency for patients after initiating or modifying antihypertensive therapy?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "hybrid"
+      },
+      {
+        "query_id": "hyp_q4",
+        "question": "Can nonphysician healthcare providers such as pharmacists and nurses administer pharmacological hypertension treatment?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 0.75,
+        "recall": 1.5,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "hybrid"
+      },
+      {
+        "query_id": "hyp_q5",
+        "question": "Summarize the complete clinical diagnostic and therapeutic sequence from initial hypertension diagnosis to long-term follow-up.",
+        "hit_rate": 0.0,
+        "mrr": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "first_match_rank": null,
+        "retrieved_count": 4,
+        "mode": "hybrid"
+      },
+      {
+        "query_id": "hyp_q6",
+        "question": "When should combination therapy be preferred over monotherapy, and what drug combinations are recommended?",
+        "hit_rate": 0.0,
+        "mrr": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "first_match_rank": null,
+        "retrieved_count": 4,
+        "mode": "hybrid"
+      },
+      {
+        "query_id": "hyp_q7",
+        "question": "How does laboratory resource availability affect the timing of treatment initiation and choice of initial antihypertensive drug class?",
+        "hit_rate": 1.0,
+        "mrr": 0.3333333333333333,
+        "precision": 0.5,
+        "recall": 0.5,
+        "first_match_rank": 3,
+        "retrieved_count": 4,
+        "mode": "hybrid"
+      },
+      {
+        "query_id": "hyp_q8",
+        "question": "What role does cardiovascular disease risk assessment play in determining the threshold and timing for initiating hypertension medication?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 0.75,
+        "recall": 0.75,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "hybrid"
+      },
+      {
+        "query_id": "hyp_q9",
+        "question": "What is the recommended systolic blood pressure threshold and treatment target for patients with existing cardiovascular disease (CVD)?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "hybrid"
+      },
+      {
+        "query_id": "hyp_q10",
+        "question": "What systolic blood pressure threshold and target goal are suggested for high-risk patients with diabetes mellitus or chronic kidney disease (CKD)?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "hybrid"
+      },
+      {
+        "query_id": "hyp_q11",
+        "question": "How should patients presenting with severely elevated blood pressure (systolic >= 160 mmHg or diastolic >= 100 mmHg) be managed initially?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 0.75,
+        "recall": 1.5,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "hybrid"
+      },
+      {
+        "query_id": "hyp_q12",
+        "question": "What are the specific therapeutic recommendations for patients presenting with baseline blood pressure >= 20/10 mmHg above target?",
+        "hit_rate": 1.0,
+        "mrr": 0.3333333333333333,
+        "precision": 0.25,
+        "recall": 0.3333333333333333,
+        "first_match_rank": 3,
+        "retrieved_count": 4,
+        "mode": "hybrid"
+      },
+      {
+        "query_id": "hyp_q13",
+        "question": "What are the recommended dosage adjustments for Metformin in patients with type 2 diabetes and diabetic nephropathy?",
+        "hit_rate": 0.0,
+        "mrr": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "first_match_rank": null,
+        "retrieved_count": 4,
+        "mode": "hybrid"
+      },
+      {
+        "query_id": "hyp_q14",
+        "question": "What is the recommended pharmacological management for acute severe hypertension or preeclampsia in pregnant women?",
+        "hit_rate": 0.0,
+        "mrr": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "first_match_rank": null,
+        "retrieved_count": 4,
+        "mode": "hybrid"
+      },
+      {
+        "query_id": "hyp_q15",
+        "question": "What specific surgical interventions or renal artery stenting protocols are indicated for secondary hypertension due to renal artery stenosis?",
+        "hit_rate": 0.0,
+        "mrr": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "first_match_rank": null,
+        "retrieved_count": 4,
+        "mode": "hybrid"
+      }
+    ],
+    "dense": [
+      {
+        "query_id": "hyp_q1",
+        "question": "What initial drug classes are recommended by WHO for adults requiring pharmacological treatment for hypertension?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "dense"
+      },
+      {
+        "query_id": "hyp_q2",
+        "question": "What is the recommended target blood pressure treatment goal for hypertensive patients without comorbidities?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "dense"
+      },
+      {
+        "query_id": "hyp_q3",
+        "question": "What is the recommended re-assessment frequency for patients after initiating or modifying antihypertensive therapy?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 0.75,
+        "recall": 1.5,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "dense"
+      },
+      {
+        "query_id": "hyp_q4",
+        "question": "Can nonphysician healthcare providers such as pharmacists and nurses administer pharmacological hypertension treatment?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "dense"
+      },
+      {
+        "query_id": "hyp_q5",
+        "question": "Summarize the complete clinical diagnostic and therapeutic sequence from initial hypertension diagnosis to long-term follow-up.",
+        "hit_rate": 0.0,
+        "mrr": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "first_match_rank": null,
+        "retrieved_count": 4,
+        "mode": "dense"
+      },
+      {
+        "query_id": "hyp_q6",
+        "question": "When should combination therapy be preferred over monotherapy, and what drug combinations are recommended?",
+        "hit_rate": 1.0,
+        "mrr": 0.25,
+        "precision": 0.25,
+        "recall": 0.3333333333333333,
+        "first_match_rank": 4,
+        "retrieved_count": 4,
+        "mode": "dense"
+      },
+      {
+        "query_id": "hyp_q7",
+        "question": "How does laboratory resource availability affect the timing of treatment initiation and choice of initial antihypertensive drug class?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 0.75,
+        "recall": 0.75,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "dense"
+      },
+      {
+        "query_id": "hyp_q8",
+        "question": "What role does cardiovascular disease risk assessment play in determining the threshold and timing for initiating hypertension medication?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 0.5,
+        "recall": 0.5,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "dense"
+      },
+      {
+        "query_id": "hyp_q9",
+        "question": "What is the recommended systolic blood pressure threshold and treatment target for patients with existing cardiovascular disease (CVD)?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 0.75,
+        "recall": 0.75,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "dense"
+      },
+      {
+        "query_id": "hyp_q10",
+        "question": "What systolic blood pressure threshold and target goal are suggested for high-risk patients with diabetes mellitus or chronic kidney disease (CKD)?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 0.75,
+        "recall": 0.75,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "dense"
+      },
+      {
+        "query_id": "hyp_q11",
+        "question": "How should patients presenting with severely elevated blood pressure (systolic >= 160 mmHg or diastolic >= 100 mmHg) be managed initially?",
+        "hit_rate": 1.0,
+        "mrr": 0.5,
+        "precision": 0.75,
+        "recall": 1.5,
+        "first_match_rank": 2,
+        "retrieved_count": 4,
+        "mode": "dense"
+      },
+      {
+        "query_id": "hyp_q12",
+        "question": "What are the specific therapeutic recommendations for patients presenting with baseline blood pressure >= 20/10 mmHg above target?",
+        "hit_rate": 1.0,
+        "mrr": 0.5,
+        "precision": 0.25,
+        "recall": 0.3333333333333333,
+        "first_match_rank": 2,
+        "retrieved_count": 4,
+        "mode": "dense"
+      },
+      {
+        "query_id": "hyp_q13",
+        "question": "What are the recommended dosage adjustments for Metformin in patients with type 2 diabetes and diabetic nephropathy?",
+        "hit_rate": 0.0,
+        "mrr": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "first_match_rank": null,
+        "retrieved_count": 4,
+        "mode": "dense"
+      },
+      {
+        "query_id": "hyp_q14",
+        "question": "What is the recommended pharmacological management for acute severe hypertension or preeclampsia in pregnant women?",
+        "hit_rate": 0.0,
+        "mrr": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "first_match_rank": null,
+        "retrieved_count": 4,
+        "mode": "dense"
+      },
+      {
+        "query_id": "hyp_q15",
+        "question": "What specific surgical interventions or renal artery stenting protocols are indicated for secondary hypertension due to renal artery stenosis?",
+        "hit_rate": 0.0,
+        "mrr": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "first_match_rank": null,
+        "retrieved_count": 4,
+        "mode": "dense"
+      }
+    ],
+    "bm25": [
+      {
+        "query_id": "hyp_q1",
+        "question": "What initial drug classes are recommended by WHO for adults requiring pharmacological treatment for hypertension?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "bm25"
+      },
+      {
+        "query_id": "hyp_q2",
+        "question": "What is the recommended target blood pressure treatment goal for hypertensive patients without comorbidities?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 0.75,
+        "recall": 1.5,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "bm25"
+      },
+      {
+        "query_id": "hyp_q3",
+        "question": "What is the recommended re-assessment frequency for patients after initiating or modifying antihypertensive therapy?",
+        "hit_rate": 1.0,
+        "mrr": 0.5,
+        "precision": 0.25,
+        "recall": 0.5,
+        "first_match_rank": 2,
+        "retrieved_count": 4,
+        "mode": "bm25"
+      },
+      {
+        "query_id": "hyp_q4",
+        "question": "Can nonphysician healthcare providers such as pharmacists and nurses administer pharmacological hypertension treatment?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 0.75,
+        "recall": 1.5,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "bm25"
+      },
+      {
+        "query_id": "hyp_q5",
+        "question": "Summarize the complete clinical diagnostic and therapeutic sequence from initial hypertension diagnosis to long-term follow-up.",
+        "hit_rate": 1.0,
+        "mrr": 0.25,
+        "precision": 0.25,
+        "recall": 0.1,
+        "first_match_rank": 4,
+        "retrieved_count": 4,
+        "mode": "bm25"
+      },
+      {
+        "query_id": "hyp_q6",
+        "question": "When should combination therapy be preferred over monotherapy, and what drug combinations are recommended?",
+        "hit_rate": 1.0,
+        "mrr": 0.3333333333333333,
+        "precision": 0.25,
+        "recall": 0.3333333333333333,
+        "first_match_rank": 3,
+        "retrieved_count": 4,
+        "mode": "bm25"
+      },
+      {
+        "query_id": "hyp_q7",
+        "question": "How does laboratory resource availability affect the timing of treatment initiation and choice of initial antihypertensive drug class?",
+        "hit_rate": 1.0,
+        "mrr": 0.25,
+        "precision": 0.25,
+        "recall": 0.25,
+        "first_match_rank": 4,
+        "retrieved_count": 4,
+        "mode": "bm25"
+      },
+      {
+        "query_id": "hyp_q8",
+        "question": "What role does cardiovascular disease risk assessment play in determining the threshold and timing for initiating hypertension medication?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 0.5,
+        "recall": 0.5,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "bm25"
+      },
+      {
+        "query_id": "hyp_q9",
+        "question": "What is the recommended systolic blood pressure threshold and treatment target for patients with existing cardiovascular disease (CVD)?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "bm25"
+      },
+      {
+        "query_id": "hyp_q10",
+        "question": "What systolic blood pressure threshold and target goal are suggested for high-risk patients with diabetes mellitus or chronic kidney disease (CKD)?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "bm25"
+      },
+      {
+        "query_id": "hyp_q11",
+        "question": "How should patients presenting with severely elevated blood pressure (systolic >= 160 mmHg or diastolic >= 100 mmHg) be managed initially?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 0.75,
+        "recall": 1.5,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "bm25"
+      },
+      {
+        "query_id": "hyp_q12",
+        "question": "What are the specific therapeutic recommendations for patients presenting with baseline blood pressure >= 20/10 mmHg above target?",
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "precision": 0.5,
+        "recall": 0.6666666666666666,
+        "first_match_rank": 1,
+        "retrieved_count": 4,
+        "mode": "bm25"
+      },
+      {
+        "query_id": "hyp_q13",
+        "question": "What are the recommended dosage adjustments for Metformin in patients with type 2 diabetes and diabetic nephropathy?",
+        "hit_rate": 0.0,
+        "mrr": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "first_match_rank": null,
+        "retrieved_count": 4,
+        "mode": "bm25"
+      },
+      {
+        "query_id": "hyp_q14",
+        "question": "What is the recommended pharmacological management for acute severe hypertension or preeclampsia in pregnant women?",
+        "hit_rate": 0.0,
+        "mrr": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "first_match_rank": null,
+        "retrieved_count": 4,
+        "mode": "bm25"
+      },
+      {
+        "query_id": "hyp_q15",
+        "question": "What specific surgical interventions or renal artery stenting protocols are indicated for secondary hypertension due to renal artery stenosis?",
+        "hit_rate": 0.0,
+        "mrr": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "first_match_rank": null,
+        "retrieved_count": 4,
+        "mode": "bm25"
+      }
+    ]
+  },
+  "generation_detailed_results": [
+    {
+      "query_id": "hyp_q1",
+      "faithfulness": 0.2162,
+      "answer_relevance": 1.0,
+      "citation_present": true,
+      "generated_answer": "WHO recommends the use of drugs from any of the following three classes of pharmacological antihypertensive medications as an initial treatment for adults with hypertension requiring pharmacological treatment:\n\n1. Thiazide and thiazide-like agents\n2. Angiotensin-converting enzyme inhibitors (ACEis) / angiotensin-receptor blockers (ARBs)\n3. Long-acting dihydropyridine calcium channel blockers (CCBs) [Section 4, Page 11]."
+    },
+    {
+      "query_id": "hyp_q2",
+      "faithfulness": 0.3684,
+      "answer_relevance": 1.0,
+      "citation_present": true,
+      "generated_answer": "The recommended target blood pressure treatment goal for hypertensive patients without comorbidities is <140/90 mmHg. This is a strong recommendation based on moderate-certainty evidence [Section 6, Page viii]."
+    },
+    {
+      "query_id": "hyp_q3",
+      "faithfulness": 0.1071,
+      "answer_relevance": 1.0,
+      "citation_present": true,
+      "generated_answer": "The recommended re-assessment frequency for patients after initiating or modifying antihypertensive therapy is a monthly follow-up until patients reach their target blood pressure. For patients whose blood pressure is under control, a follow-up every 3 to 6 months is suggested [Section 3.7, Page 17; Section 7, Page ix]."
+    },
+    {
+      "query_id": "hyp_q4",
+      "faithfulness": 0.2239,
+      "answer_relevance": 1.0,
+      "citation_present": true,
+      "generated_answer": "Yes, nonphysician healthcare providers such as pharmacists and nurses can administer pharmacological treatment for hypertension, provided that certain conditions are met. These include proper training, prescribing authority, specific management protocols, and physician oversight. This recommendation is supported by the WHO guidelines, which state that such practices are permissible under these conditions [Section 8, Page 19]. \n\nAdditionally, evidence suggests that nonphysician management can lead to better blood pressure control, with studies indicating improved outcomes when care is managed by pharmacists and nurses [Section 4, Page 19]. However, it is important to note that the overall certainty of this evidence is low [Section 8, Page ix]."
+    },
+    {
+      "query_id": "hyp_q5",
+      "faithfulness": 0.12,
+      "answer_relevance": 0.9231,
+      "citation_present": false,
+      "generated_answer": "Based on the provided NICE guidelines context, there is insufficient evidence to answer this query. The guidelines do not detail a complete clinical diagnostic and therapeutic sequence from initial hypertension diagnosis to long-term follow-up."
+    },
+    {
+      "query_id": "hyp_q6",
+      "faithfulness": 0.12,
+      "answer_relevance": 1.0,
+      "citation_present": true,
+      "generated_answer": "Combination therapy should be preferred over monotherapy in the management of hypertension when patients require two or more antihypertensive agents to achieve optimal and sustained blood pressure control. The rationale for this recommendation is based on evidence that combination therapy yields greater blood pressure reduction efficacy, reduces side effects due to lower doses of each agent, and improves medication adherence and persistence [Section 1.4.2, Page 14].\n\nThe guideline suggests that effective combinations typically include agents from complementary classes, such as diuretics, ACE inhibitors (ACEi), angiotensin receptor blockers (ARB), and calcium channel blockers (CCB). Specifically, combinations that contain these three drug classes (diuretic, ACEi/ARB, and CCB) have shown overall effectiveness [Section 1.5.7, Page 14]. \n\nHowever, the guidelines do not specify particular drug combinations or dosages, indicating a need for further research on long-term clinical outcomes and health economic analyses to better inform these decisions [Section 1.5.7, Page 25]. \n\nIn summary, combination therapy is preferred when patients need multiple agents for effective blood pressure control, particularly using complementary drug classes, but specific combinations are not detailed in the provided context."
+    },
+    {
+      "query_id": "hyp_q7",
+      "faithfulness": 0.2093,
+      "answer_relevance": 0.9231,
+      "citation_present": true,
+      "generated_answer": "The availability of laboratory resources significantly influences the timing of treatment initiation and the choice of initial antihypertensive drug class. According to the guidelines, when starting pharmacological therapy for hypertension, it is recommended to obtain tests to screen for comorbidities and secondary hypertension, but only if such testing does not delay or impede the initiation of treatment. In low-resourced areas or non-clinical settings, where laboratory testing may not be feasible due to costs or lack of access, treatment should not be delayed, and testing can be performed subsequently [Section 3.2, Page 8]. \n\nFurthermore, certain medications, such as long-acting dihydropyridine calcium-channel blockers (CCBs), are considered more suitable for initiation without prior testing compared to diuretics or ACE inhibitors/ARBs [Section 3.2, Page 8]. This indicates that the choice of initial drug class may also be influenced by the availability of laboratory resources."
+    },
+    {
+      "query_id": "hyp_q8",
+      "faithfulness": 0.2917,
+      "answer_relevance": 0.7692,
+      "citation_present": true,
+      "generated_answer": "Cardiovascular disease (CVD) risk assessment plays a conditional role in determining the threshold and timing for initiating pharmacological treatment for hypertension. According to the guidelines, most patients with a systolic blood pressure (SBP) of ≥140 mmHg or diastolic blood pressure (DBP) of ≥90 mmHg are considered high risk and are indicated for pharmacological treatment without the need for prior CVD risk assessment. This is particularly relevant as these patients do not require risk assessment before treatment initiation [Section 3, Page 10].\n\nHowever, CVD risk assessment is deemed more critical for guiding decisions about initiating treatment in patients with lower SBP levels (130–139 mmHg). In such cases, identifying and managing other risk factors is essential to lower overall cardiovascular risk [Section 3, Page 10]. \n\nThe guidelines also emphasize that if risk assessment could delay the timely initiation of hypertension treatment or patient follow-up, it should be postponed and included in a follow-up strategy rather than being a prerequisite for treatment initiation [Section 3, Page 10]. \n\nIn summary, while CVD risk assessment can inform treatment decisions, it should not delay the initiation of pharmacological therapy in patients with higher blood pressure readings."
+    },
+    {
+      "query_id": "hyp_q9",
+      "faithfulness": 0.5,
+      "answer_relevance": 1.0,
+      "citation_present": true,
+      "generated_answer": "The recommended systolic blood pressure threshold for initiating pharmacological treatment in patients with existing cardiovascular disease (CVD) is 130–139 mmHg. The treatment target for these patients is a systolic blood pressure of <130 mmHg [Section 1.1, Page 7; Section 3.6, Page 16]."
+    },
+    {
+      "query_id": "hyp_q10",
+      "faithfulness": 0.2292,
+      "answer_relevance": 1.0,
+      "citation_present": true,
+      "generated_answer": "For high-risk patients with hypertension, including those with diabetes mellitus or chronic kidney disease (CKD), the suggested target systolic blood pressure treatment goal is <130 mmHg. This is a conditional recommendation based on moderate-certainty evidence [Section 6, Page viii]. Additionally, pharmacological antihypertensive treatment is suggested for individuals without cardiovascular disease but with high cardiovascular risk, diabetes mellitus, or CKD, at a systolic blood pressure of 130–139 mmHg [Section 3.6, Page 16]."
+    },
+    {
+      "query_id": "hyp_q11",
+      "faithfulness": 0.3421,
+      "answer_relevance": 0.9286,
+      "citation_present": true,
+      "generated_answer": "Patients presenting with severely elevated blood pressure (systolic ≥160 mmHg or diastolic ≥100 mmHg) should have pharmacological antihypertensive treatment initiated without delay. This recommendation is based on the guideline that states if blood pressure levels are high or there is accompanying evidence of end organ damage, treatment should start immediately [Section 3.1, Page 7]."
+    },
+    {
+      "query_id": "hyp_q12",
+      "faithfulness": 0.0,
+      "answer_relevance": 0.3333,
+      "citation_present": false,
+      "generated_answer": "Based on the provided NICE guidelines context, there is insufficient evidence to answer this query."
+    },
+    {
+      "query_id": "hyp_q13",
+      "faithfulness": 0.0909,
+      "answer_relevance": 0.0,
+      "citation_present": false,
+      "generated_answer": "Based on the provided NICE guidelines context, there is insufficient evidence to answer this query."
+    },
+    {
+      "query_id": "hyp_q14",
+      "faithfulness": 0.0,
+      "answer_relevance": 0.2222,
+      "citation_present": false,
+      "generated_answer": "Based on the provided NICE guidelines context, there is insufficient evidence to answer this query."
+    },
+    {
+      "query_id": "hyp_q15",
+      "faithfulness": 0.0909,
+      "answer_relevance": 0.0769,
+      "citation_present": false,
+      "generated_answer": "Based on the provided NICE guidelines context, there is insufficient evidence to answer this query."
+    }
+  ]
+}

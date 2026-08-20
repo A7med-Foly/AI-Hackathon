@@ -57,4 +57,4 @@ def test_fastapi_endpoints():
     # Test UI Endpoint
     ui_res = client.get("/")
     assert ui_res.status_code == 200
-    assert "NICE Guidelines Medical RAG" in ui_res.text
+    assert "Medical Guidelines RAG Studio" in ui_res.text

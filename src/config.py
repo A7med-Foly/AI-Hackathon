@@ -86,3 +86,12 @@ LLM_FALLBACK_MODELS = [
 # ==============================================================================
 SERVER_HOST = "127.0.0.1"
 SERVER_PORT = 8000
+
+
+# ==============================================================================
+# 8. EVALUATION CONFIGURATION
+# ==============================================================================
+EVAL_DATASET_PATH = str(DATA_DIR / "eval_dataset.json")
+EVAL_RESULTS_PATH = str(DATA_DIR / "eval_results.json")
+DEFAULT_EVAL_TOP_K = 4
+
